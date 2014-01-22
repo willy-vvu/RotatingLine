@@ -11,11 +11,11 @@
 public class Vector2 {
 	public double x = 0;
 	public double y = 0;
-
+	
 	/**
 	 * Creates a new, default Vector2, with the value (0,0)
 	 */
-	Vector2() {
+	public Vector2() {
 	}
 
 	/**
@@ -24,7 +24,7 @@ public class Vector2 {
 	 * @param x
 	 * @param y
 	 */
-	Vector2(double x, double y) {
+	public Vector2(double x, double y) {
 		this.set(x, y);
 	}
 
@@ -35,7 +35,7 @@ public class Vector2 {
 	 * @param y
 	 * @return
 	 */
-	Vector2 set(double x, double y) {
+	public Vector2 set(double x, double y) {
 		this.x = x;
 		this.y = y;
 		return this;
@@ -47,7 +47,7 @@ public class Vector2 {
 	 * @param vector
 	 * @return itself
 	 */
-	Vector2 multiply(Vector2 vector) {
+	public Vector2 multiply(Vector2 vector) {
 		this.x *= vector.x;
 		this.y *= vector.y;
 		return this;
@@ -59,7 +59,7 @@ public class Vector2 {
 	 * @param vector
 	 * @return itself
 	 */
-	Vector2 add(Vector2 vector) {
+	public Vector2 add(Vector2 vector) {
 		this.x += vector.x;
 		this.y += vector.y;
 		return this;
@@ -71,7 +71,7 @@ public class Vector2 {
 	 * @param vector
 	 * @return itself
 	 */
-	Vector2 subtract(Vector2 vector) {
+	public Vector2 subtract(Vector2 vector) {
 		this.x -= vector.x;
 		this.y -= vector.y;
 		return this;
@@ -83,7 +83,7 @@ public class Vector2 {
 	 * @param scalar
 	 * @return itself
 	 */
-	Vector2 multiplyScalar(double scalar) {
+	public Vector2 multiplyScalar(double scalar) {
 		this.x *= scalar;
 		this.y *= scalar;
 		return this;
@@ -95,11 +95,21 @@ public class Vector2 {
 	 * @param theta
 	 * @return itself
 	 */
-	Vector2 rotate(double theta) {
+	public Vector2 rotate(double theta) {
 		double tempX = x, tempY = y;
 		this.x = tempX * Math.cos(theta) - tempY * Math.sin(theta);
 		this.y = tempX * Math.sin(theta) + tempY * Math.cos(theta);
 		return this;
+	}
+	/**
+	 * Use the pythagorean theorem on x and y.
+	 * 
+	 * @param x
+	 * @param y
+	 * @return
+	 */
+	public static double hypotenuse(double x, double y) {
+		return Math.sqrt(x * x + y * y);
 	}
 
 }
