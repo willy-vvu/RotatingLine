@@ -16,15 +16,32 @@ public class Shape {
 	private double rotationSpeed = 0;
 	private double rotation = 0;
 	private int sides = 2;
+	// Note that the center is between 0 and 1, relative to the container size.
 	private Vector2 center = new Vector2();
 	private Vector2 containerSize = null;
+	private static Vector2 temp = new Vector2();
+
+	/**
+	 * Tests out the Shape class and its methods.
+	 * 
+	 * @param args
+	 */
+	public static void main(String[] args) {
+		Shape s = new Shape(3);
+		s.setCenter(new Vector2(0.5, 0.5));
+		s.setContainerSize(new Vector2(100, 100));
+		s.inflate();
+		System.out.println(s);
+		s.inscribe();
+		System.out.println(s);
+	}
 
 	/**
 	 * Creates a new two sided shape, or line.
 	 */
 	public Shape() {
 		// The setter does stuff.
-		this.setSides(2);
+		this.setSides(this.sides);
 	}
 
 	/**
@@ -43,11 +60,11 @@ public class Shape {
 	 * 
 	 * @return itself
 	 */
-	public Shape compute() {
+	private Shape compute() {
 		// Find the angle between each vertex and the center.
 		double deltaTheta = 2 * Math.PI / this.sides;
 		for (int i = 0; i < vertices.size(); i++) {
-			vertices.get(0).set(1, 0).rotate(this.rotation + i * deltaTheta);
+			vertices.get(i).set(1, 0).rotate(this.rotation + i * deltaTheta);
 		}
 		return this;
 	}
@@ -59,9 +76,26 @@ public class Shape {
 	 * @return itself
 	 */
 	public Shape inflate() {
+		this.compute();
 		for (int i = 0; i < vertices.size(); i++) {
 			Vector2 currentVertex = this.vertices.get(i);
-			currentVertex.multiplyScalar(this.toSide(currentVertex));
+			currentVertex.multiplyScalar(this.getToSide(currentVertex));
+		}
+		this.center();
+		return this;
+	}
+
+	/**
+	 * Centers the shape in the container.
+	 * 
+	 * @return itself
+	 */
+	private Shape center() {
+		// Get the offset to the center
+		Shape.temp.copy(this.center).multiply(this.containerSize);
+		// Add to each vertex
+		for (int i = 0; i < vertices.size(); i++) {
+			this.vertices.get(i).add(Shape.temp);
 		}
 		return this;
 	}
@@ -71,19 +105,21 @@ public class Shape {
 	 * from any vertex to the edge and setting the radius of the polygon
 	 * accordingly.
 	 * 
-	 * @return
+	 * @return itself
 	 */
 	public Shape inscribe() {
+		this.compute();
 		// Find the minimum distance to a wall from any vertex
 		double minimumRadius = Double.POSITIVE_INFINITY;
 		for (int i = 0; i < vertices.size(); i++) {
 			minimumRadius = Math.min(minimumRadius,
-					this.toSide(this.vertices.get(i)));
+					this.getToSide(this.vertices.get(i)));
 		}
 		// Set the radius of the polygon to that minimum distance
 		for (int i = 0; i < vertices.size(); i++) {
 			this.vertices.get(i).multiplyScalar(minimumRadius);
 		}
+		this.center();
 		return this;
 	}
 
@@ -93,12 +129,13 @@ public class Shape {
 	 * @param vector
 	 * @return
 	 */
-	public double toSide(Vector2 vector) {
+	public double getToSide(Vector2 vector) {
 		double distanceToWallPoint = Double.POSITIVE_INFINITY, distanceToFloorPoint = Double.POSITIVE_INFINITY;
 		if (vector.x != 0) {
 			// Find the x distance to the left or right wall.
 			double distanceToWall = vector.x > 0 ? this.containerSize.x
-					- this.center.x : this.center.x;
+					* (1 - this.center.x) : this.center.x
+					* this.containerSize.x;
 			// Find the total distance to projected point on the left or right
 			// wall.
 			distanceToWallPoint = Vector2.hypotenuse(distanceToWall, vector.y
@@ -106,8 +143,9 @@ public class Shape {
 		}
 		if (vector.y != 0) {
 			// Find the y distance to the ceiling or floor.
-			double distanceToCeiling = vector.y > 0 ? this.containerSize.y
-					- this.center.y : this.center.y;
+			double distanceToCeiling = vector.y > 0 ? (1 - this.center.y)
+					* this.containerSize.y : this.center.y
+					* this.containerSize.y;
 			// Find the total distance to projected point on the ceiling or
 			// floor.
 			distanceToFloorPoint = Vector2.hypotenuse(distanceToCeiling,
@@ -228,5 +266,12 @@ public class Shape {
 	 */
 	public void setContainerSize(Vector2 containerSize) {
 		this.containerSize = containerSize;
+	}
+
+	/**
+	 * Returns the vertices that form the shape.
+	 */
+	public String toString() {
+		return this.vertices.toString();
 	}
 }
