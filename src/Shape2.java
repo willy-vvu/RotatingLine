@@ -60,6 +60,15 @@ public class Shape2 {
 	 * @return itself
 	 */
 	private Shape2 compute() {
+		// Resize the vertex array to match the number of sides in the shape
+		while (vertices.size() < this.sides) {
+			// Fewer points than sides? No problem.
+			vertices.add(new Vector2());
+		}
+		while (vertices.size() > this.sides) {
+			// More vertices than sides? We've got that covered.
+			vertices.remove(0);
+		}
 		// Find the angle between each vertex and the center.
 		double deltaTheta = 2 * Math.PI / this.sides;
 		for (int i = 0; i < vertices.size(); i++) {
@@ -216,15 +225,6 @@ public class Shape2 {
 	 */
 	public void setSides(int sides) {
 		this.sides = sides;
-		// Resize the vertex array to match the number of sides in the shape
-		while (vertices.size() < this.sides) {
-			// Fewer points than sides? No problem.
-			vertices.add(new Vector2());
-		}
-		while (vertices.size() > this.sides) {
-			// More vertices than sides? We've got that covered.
-			vertices.remove(0);
-		}
 	}
 
 	/**
