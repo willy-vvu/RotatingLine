@@ -42,6 +42,18 @@ public class Vector2 {
 	}
 
 	/**
+	 * Copies the values of another vector to itself
+	 * 
+	 * @param vector
+	 * @return
+	 */
+	public Vector2 copy(Vector2 vector) {
+		this.x = vector.x;
+		this.y = vector.y;
+		return this;
+	}
+
+	/**
 	 * Multiplies another vector into itself.
 	 * 
 	 * @param vector
@@ -114,8 +126,7 @@ public class Vector2 {
 	}
 
 	/**
-	 * 
-	 * @return the vector in the form (x, y)
+	 * Returns the vector in the form (x, y)
 	 */
 	public String toString() {
 		return "(" + this.x + ", " + this.y + ")";
