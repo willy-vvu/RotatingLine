@@ -139,25 +139,25 @@ public class Shape2 {
 	 */
 	public double getToSide(Vector2 vector) {
 		double distanceToWallPoint = Double.POSITIVE_INFINITY, distanceToFloorPoint = Double.POSITIVE_INFINITY;
-		if (vector.x != 0) {
+		if (vector.getX() != 0) {
 			// Find the x distance to the left or right wall.
-			double distanceToWall = vector.x > 0 ? this.containerSize.x
-					* (1 - this.center.x) : this.center.x
-					* this.containerSize.x;
+			double distanceToWall = vector.getX() > 0 ? this.containerSize.getX()
+					* (1 - this.center.getX()) : this.center.getX()
+					* this.containerSize.getX();
 			// Find the total distance to projected point on the left or right
 			// wall.
-			distanceToWallPoint = Vector2.hypotenuse(distanceToWall, vector.y
-					* distanceToWall / vector.x);
+			distanceToWallPoint = Vector2.hypotenuse(distanceToWall, vector.getY()
+					* distanceToWall / vector.getX());
 		}
-		if (vector.y != 0) {
+		if (vector.getY() != 0) {
 			// Find the y distance to the ceiling or floor.
-			double distanceToCeiling = vector.y > 0 ? (1 - this.center.y)
-					* this.containerSize.y : this.center.y
-					* this.containerSize.y;
+			double distanceToCeiling = vector.getY() > 0 ? (1 - this.center.getY())
+					* this.containerSize.getY() : this.center.getY()
+					* this.containerSize.getY();
 			// Find the total distance to projected point on the ceiling or
 			// floor.
 			distanceToFloorPoint = Vector2.hypotenuse(distanceToCeiling,
-					vector.x * distanceToCeiling / vector.y);
+					vector.getX() * distanceToCeiling / vector.getY());
 		}
 		// Return whichever distance is closer, wall or ceiling.
 		return Math.min(distanceToWallPoint, distanceToFloorPoint);

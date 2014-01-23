@@ -9,8 +9,8 @@
  * 
  */
 public class Vector2 {
-	public double x = 0;
-	public double y = 0;
+	private double x = 0;
+	private double y = 0;
 
 	/**
 	 * Creates a new, default Vector2, with the value (0,0)
@@ -130,5 +130,33 @@ public class Vector2 {
 	 */
 	public String toString() {
 		return "(" + this.x + ", " + this.y + ")";
+	}
+
+	/**
+	 * @return the x
+	 */
+	public double getX() {
+		return x;
+	}
+
+	/**
+	 * @param x the x to set
+	 */
+	public void setX(double x) {
+		this.x = x;
+	}
+
+	/**
+	 * @return the y
+	 */
+	public double getY() {
+		return y;
+	}
+
+	/**
+	 * @param y the y to set
+	 */
+	public void setY(double y) {
+		this.y = y;
 	}
 }
