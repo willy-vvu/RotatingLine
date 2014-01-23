@@ -1,4 +1,3 @@
-import java.awt.Graphics2D;
 import java.util.ArrayList;
 
 /**
@@ -153,16 +152,6 @@ public class Shape2 {
 		}
 		// Return whichever distance is closer, wall or ceiling.
 		return Math.min(distanceToWallPoint, distanceToFloorPoint);
-	}
-
-	/**
-	 * Draws the shape in a given graphics context.
-	 * 
-	 * @param graphics
-	 * @return
-	 */
-	public Shape2 draw(Graphics2D graphics) {
-		return this;
 	}
 
 	/**
