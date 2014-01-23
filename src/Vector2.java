@@ -11,7 +11,7 @@
 public class Vector2 {
 	public double x = 0;
 	public double y = 0;
-	
+
 	/**
 	 * Creates a new, default Vector2, with the value (0,0)
 	 */
@@ -101,6 +101,7 @@ public class Vector2 {
 		this.y = tempX * Math.sin(theta) + tempY * Math.cos(theta);
 		return this;
 	}
+
 	/**
 	 * Use the pythagorean theorem on x and y.
 	 * 
@@ -112,4 +113,11 @@ public class Vector2 {
 		return Math.sqrt(x * x + y * y);
 	}
 
+	/**
+	 * 
+	 * @return the vector in the form (x, y)
+	 */
+	public String toString() {
+		return "(" + this.x + ", " + this.y + ")";
+	}
 }
