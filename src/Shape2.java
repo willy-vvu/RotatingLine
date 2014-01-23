@@ -39,8 +39,6 @@ public class Shape2 {
 	 * Creates a new two sided shape, or line.
 	 */
 	public Shape2() {
-		// The setter does stuff.
-		this.setSides(this.sides);
 	}
 
 	/**
@@ -49,7 +47,18 @@ public class Shape2 {
 	 * @param sides
 	 */
 	public Shape2(int sides) {
-		this.setSides(sides);
+		this.sides = sides;
+	}
+
+	/**
+	 * Create a new shape with a given number of sides and a given center
+	 * 
+	 * @param sides
+	 * @param center
+	 */
+	public Shape2(int sides, Vector2 center) {
+		this(sides);
+		this.center.copy(center);
 	}
 
 	/**
@@ -141,18 +150,18 @@ public class Shape2 {
 		double distanceToWallPoint = Double.POSITIVE_INFINITY, distanceToFloorPoint = Double.POSITIVE_INFINITY;
 		if (vector.getX() != 0) {
 			// Find the x distance to the left or right wall.
-			double distanceToWall = vector.getX() > 0 ? this.containerSize.getX()
-					* (1 - this.center.getX()) : this.center.getX()
+			double distanceToWall = vector.getX() > 0 ? this.containerSize
+					.getX() * (1 - this.center.getX()) : this.center.getX()
 					* this.containerSize.getX();
 			// Find the total distance to projected point on the left or right
 			// wall.
-			distanceToWallPoint = Vector2.hypotenuse(distanceToWall, vector.getY()
-					* distanceToWall / vector.getX());
+			distanceToWallPoint = Vector2.hypotenuse(distanceToWall,
+					vector.getY() * distanceToWall / vector.getX());
 		}
 		if (vector.getY() != 0) {
 			// Find the y distance to the ceiling or floor.
-			double distanceToCeiling = vector.getY() > 0 ? (1 - this.center.getY())
-					* this.containerSize.getY() : this.center.getY()
+			double distanceToCeiling = vector.getY() > 0 ? (1 - this.center
+					.getY()) * this.containerSize.getY() : this.center.getY()
 					* this.containerSize.getY();
 			// Find the total distance to projected point on the ceiling or
 			// floor.
