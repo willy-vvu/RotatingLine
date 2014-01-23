@@ -33,7 +33,7 @@ public class Vector2 {
 	 * 
 	 * @param x
 	 * @param y
-	 * @return
+	 * @return itself
 	 */
 	public Vector2 set(double x, double y) {
 		this.x = x;
@@ -42,10 +42,10 @@ public class Vector2 {
 	}
 
 	/**
-	 * Copies the values of another vector to itself
+	 * Copies the values of another vector into itself
 	 * 
 	 * @param vector
-	 * @return
+	 * @return itself
 	 */
 	public Vector2 copy(Vector2 vector) {
 		this.x = vector.x;
@@ -102,6 +102,16 @@ public class Vector2 {
 	}
 
 	/**
+	 * Divides the vector by a scalar.
+	 * 
+	 * @param scalar
+	 * @return itself
+	 */
+	public Vector2 divideScalar(double scalar) {
+		return this.multiplyScalar(scalar == 0 ? 0 : 1 / scalar);
+	}
+
+	/**
 	 * Rotates a vector counter-clockwise by a given angle.
 	 * 
 	 * @param theta
@@ -115,11 +125,20 @@ public class Vector2 {
 	}
 
 	/**
+	 * Inverses the current Vector2.
+	 * 
+	 * @return itself
+	 */
+	public Vector2 inverse() {
+		return this.multiplyScalar(-1);
+	}
+
+	/**
 	 * Use the pythagorean theorem on x and y.
 	 * 
 	 * @param x
 	 * @param y
-	 * @return
+	 * @return the hypotenuse
 	 */
 	public static double hypotenuse(double x, double y) {
 		return Math.sqrt(x * x + y * y);
@@ -140,7 +159,8 @@ public class Vector2 {
 	}
 
 	/**
-	 * @param x the x to set
+	 * @param x
+	 *            the x to set
 	 */
 	public void setX(double x) {
 		this.x = x;
@@ -154,7 +174,8 @@ public class Vector2 {
 	}
 
 	/**
-	 * @param y the y to set
+	 * @param y
+	 *            the y to set
 	 */
 	public void setY(double y) {
 		this.y = y;
