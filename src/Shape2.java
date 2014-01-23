@@ -14,6 +14,9 @@ public class Shape2 {
 	private ArrayList<Vector2> vertices = new ArrayList<Vector2>();
 	private double rotationSpeed = 0;
 	private double rotation = 0;
+	private int mode = Shape2.INFLATE;
+	public static final int INFLATE = 0;
+	public static final int INSCRIBE = 1;
 	private int sides = 2;
 	// Note that the center is between 0 and 1, relative to the container size.
 	private Vector2 center = new Vector2();
@@ -51,7 +54,7 @@ public class Shape2 {
 	}
 
 	/**
-	 * Create a new shape with a given number of sides and a given center
+	 * Creates a new shape with a given number of sides and a given center.
 	 * 
 	 * @param sides
 	 * @param center
@@ -59,6 +62,33 @@ public class Shape2 {
 	public Shape2(int sides, Vector2 center) {
 		this(sides);
 		this.center.copy(center);
+	}
+
+	/**
+	 * Creates a new shape with a given number of sides, center, and rotation
+	 * speed.
+	 * 
+	 * @param sides
+	 * @param center
+	 * @param rotationSpeed
+	 */
+	public Shape2(int sides, Vector2 center, double rotationSpeed) {
+		this(sides, center);
+		this.rotationSpeed = rotationSpeed;
+	}
+
+	/**
+	 * Creates a new shape with a given number of sides, center, rotation speed,
+	 * and mode of transform (inflate or inscribe).
+	 * 
+	 * @param sides
+	 * @param center
+	 * @param rotationSpeed
+	 * @param mode
+	 */
+	public Shape2(int sides, Vector2 center, double rotationSpeed, int mode) {
+		this(sides, center, rotationSpeed);
+		this.mode = mode;
 	}
 
 	/**
@@ -82,6 +112,20 @@ public class Shape2 {
 		double deltaTheta = 2 * Math.PI / this.sides;
 		for (int i = 0; i < vertices.size(); i++) {
 			vertices.get(i).set(1, 0).rotate(this.rotation + i * deltaTheta);
+		}
+		return this;
+	}
+
+	/**
+	 * Transforms (inflates or inscribes) the shape based on its mode
+	 * 
+	 * @return itself
+	 */
+	public Shape2 transform() {
+		if (this.mode == Shape2.INFLATE) {
+			this.inflate();
+		} else if (this.mode == Shape2.INSCRIBE) {
+			this.inscribe();
 		}
 		return this;
 	}
@@ -271,5 +315,20 @@ public class Shape2 {
 	 */
 	public String toString() {
 		return this.vertices.toString();
+	}
+
+	/**
+	 * @return the mode
+	 */
+	public int getMode() {
+		return mode;
+	}
+
+	/**
+	 * @param mode
+	 *            the mode to set
+	 */
+	public void setMode(int mode) {
+		this.mode = mode;
 	}
 }

@@ -52,9 +52,9 @@ class ShapeDrawingComponent extends JComponent {
 	private long lastTick = 0;
 
 	public ShapeDrawingComponent() {
-
-		shapes.add(new Shape2(5, new Vector2(0.5, 0.5)));
-		shapes.get(0).setRotationSpeed(1);
+		shapes.add(new Shape2(5, new Vector2(0.5, 0.5), 1, Shape2.INFLATE));
+		shapes.add(new Shape2(3, new Vector2(0.2, 0.5), -0.4, Shape2.INSCRIBE));
+		shapes.add(new Shape2(2, new Vector2(0.5, 0.3), .3, Shape2.INFLATE));
 	}
 
 	public void paintComponent(Graphics graphics) {
@@ -75,7 +75,7 @@ class ShapeDrawingComponent extends JComponent {
 
 			// lets the shape know how big the window is
 			currentShape.setContainerSize(containerSize);
-			currentShape.inflate();
+			currentShape.transform();
 			this.drawShape(g, currentShape);
 			currentShape.step(timeElapsed);
 		}
