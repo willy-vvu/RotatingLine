@@ -2,16 +2,16 @@ import java.awt.Graphics2D;
 import java.util.ArrayList;
 
 /**
- * Shape.java
+ * Shape2.java
  * 
- * A shape that contains and manipulates a
+ * A 2 dimensional shape (n-gon) that computes and transforms its vertices.
  * 
  * Written Jan 22, 2014.
  * 
  * @author William Wu
  * 
  */
-public class Shape {
+public class Shape2 {
 	private ArrayList<Vector2> vertices = new ArrayList<Vector2>();
 	private double rotationSpeed = 0;
 	private double rotation = 0;
@@ -22,12 +22,12 @@ public class Shape {
 	private static Vector2 temp = new Vector2();
 
 	/**
-	 * Tests out the Shape class and its methods.
+	 * Tests out the Shape2 class and its methods.
 	 * 
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		Shape s = new Shape(3);
+		Shape2 s = new Shape2(3);
 		s.setCenter(new Vector2(0.5, 0.5));
 		s.setContainerSize(new Vector2(100, 100));
 		s.inflate();
@@ -39,7 +39,7 @@ public class Shape {
 	/**
 	 * Creates a new two sided shape, or line.
 	 */
-	public Shape() {
+	public Shape2() {
 		// The setter does stuff.
 		this.setSides(this.sides);
 	}
@@ -49,7 +49,7 @@ public class Shape {
 	 * 
 	 * @param sides
 	 */
-	public Shape(int sides) {
+	public Shape2(int sides) {
 		this.setSides(sides);
 	}
 
@@ -60,7 +60,7 @@ public class Shape {
 	 * 
 	 * @return itself
 	 */
-	private Shape compute() {
+	private Shape2 compute() {
 		// Find the angle between each vertex and the center.
 		double deltaTheta = 2 * Math.PI / this.sides;
 		for (int i = 0; i < vertices.size(); i++) {
@@ -75,7 +75,7 @@ public class Shape {
 	 * 
 	 * @return itself
 	 */
-	public Shape inflate() {
+	public Shape2 inflate() {
 		this.compute();
 		for (int i = 0; i < vertices.size(); i++) {
 			Vector2 currentVertex = this.vertices.get(i);
@@ -90,12 +90,12 @@ public class Shape {
 	 * 
 	 * @return itself
 	 */
-	private Shape center() {
+	private Shape2 center() {
 		// Get the offset to the center
-		Shape.temp.copy(this.center).multiply(this.containerSize);
+		Shape2.temp.copy(this.center).multiply(this.containerSize);
 		// Add to each vertex
 		for (int i = 0; i < vertices.size(); i++) {
-			this.vertices.get(i).add(Shape.temp);
+			this.vertices.get(i).add(Shape2.temp);
 		}
 		return this;
 	}
@@ -107,7 +107,7 @@ public class Shape {
 	 * 
 	 * @return itself
 	 */
-	public Shape inscribe() {
+	public Shape2 inscribe() {
 		this.compute();
 		// Find the minimum distance to a wall from any vertex
 		double minimumRadius = Double.POSITIVE_INFINITY;
@@ -161,7 +161,7 @@ public class Shape {
 	 * @param graphics
 	 * @return
 	 */
-	public Shape draw(Graphics2D graphics) {
+	public Shape2 draw(Graphics2D graphics) {
 		return this;
 	}
 
@@ -172,7 +172,7 @@ public class Shape {
 	 *            the time that has elapsed since the previous step
 	 * @return
 	 */
-	public Shape step(double deltaTime) {
+	public Shape2 step(double deltaTime) {
 		this.rotation += this.rotationSpeed * deltaTime;
 		return this;
 	}

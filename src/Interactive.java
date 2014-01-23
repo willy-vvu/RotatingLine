@@ -12,6 +12,6 @@ public class Interactive {
 
 class ShapeDrawingComponent extends JComponent{
 	private static final long serialVersionUID = 1L;
-	private Shape shape;
+	private Shape2 shape;
 	
 }
