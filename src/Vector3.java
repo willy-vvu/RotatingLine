@@ -10,6 +10,9 @@
  */
 public class Vector3 extends Vector2 {
 	private double z = 0;
+	private static Vector3 tempV3 = new Vector3();
+	private static Vector3 tempV3_2 = new Vector3();
+	private static Quaternion tempQ = new Quaternion();
 
 	/**
 	 * Creates a new, default Vector3, with the value (0,0,0)
@@ -137,20 +140,14 @@ public class Vector3 extends Vector2 {
 	 */
 	public Vector3 multiplyMatrix(Matrix4 matrix) {
 		// Everyone loves matrix multiplication!
-		double tempX = matrix.getAt(0, 0) * getX() + matrix.getAt(0, 1)
-				* getY() + matrix.getAt(0, 2) * this.z + matrix.getAt(0, 3), tempY = matrix
-				.getAt(1, 0)
-				* getX()
-				+ matrix.getAt(1, 1)
-				* getY()
-				+ matrix.getAt(1, 2) * this.z + matrix.getAt(1, 3), tempZ = matrix
-				.getAt(2, 0)
-				* getX()
-				+ matrix.getAt(2, 1)
-				* getY()
+		double tempX = matrix.getAt(0, 0) * this.getX() + matrix.getAt(0, 1)
+				* this.getY() + matrix.getAt(0, 2) * this.z
+				+ matrix.getAt(0, 3), tempY = matrix.getAt(1, 0) * this.getX()
+				+ matrix.getAt(1, 1) * this.getY() + matrix.getAt(1, 2)
+				* this.z + matrix.getAt(1, 3), tempZ = matrix.getAt(2, 0)
+				* this.getX() + matrix.getAt(2, 1) * this.getY()
 				+ matrix.getAt(2, 2) * this.z + matrix.getAt(2, 3);
-		setX(tempX);
-		setY(tempY);
+		super.set(tempX, tempY);
 		this.z = tempZ;
 		return this;
 	}
@@ -166,10 +163,54 @@ public class Vector3 extends Vector2 {
 	}
 
 	/**
+	 * Cross products another vector into itself.
+	 * 
+	 * @param vector
+	 * @return
+	 */
+	public Vector3 cross(Vector3 vector) {
+		double tempX = this.getY() * vector.getZ() - vector.getY()
+				* this.getZ(), tempY = this.getX() * vector.getZ()
+				- vector.getX() * this.getZ(), tempZ = this.getX()
+				* vector.getY() - vector.getX() * this.getY();
+		this.set(tempX, tempY, tempZ);
+		return this;
+	}
+
+	/**
+	 * Rotates the current vector by a Quaternion
+	 * 
+	 * @param quaternion
+	 * @return itself
+	 */
+	public Vector3 rotate(Quaternion quaternion) {
+		// v+2r x (r x v+wv)
+		Vector3.tempV3.copy(this).multiplyScalar(quaternion.getW());
+		Vector3.tempV3_2.copy(quaternion).cross(this).add(Vector3.tempV3);
+		Vector3.tempV3.copy(quaternion).multiplyScalar(2)
+				.cross(Vector3.tempV3_2);
+		this.add(Vector3.tempV3);
+		// (quaternion.getW())
+		return this;
+	}
+
+	/**
+	 * Rotates the current vector by a Rotation
+	 * 
+	 * @param rotation
+	 * @return itself
+	 */
+	public Vector3 rotate(Rotation rotation) {
+		Vector3.tempQ.setFromRotation(rotation);
+		return this.rotate(Vector3.tempQ);
+	}
+
+	/**
 	 * Use the pythagorean theorem on x, y, and z.
 	 * 
 	 * @param x
 	 * @param y
+	 * @param z
 	 * @return the hypotenuse
 	 */
 	public static double hypotenuse(double x, double y, double z) {

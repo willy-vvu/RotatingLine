@@ -8,72 +8,55 @@
  * @author William Wu
  * 
  */
-public class Rotation {
-	private double theta = 0;
-	private Vector3 axis = new Vector3(0, 1, 0);
+public class Rotation extends Vector3 {
+	public double angle = 0;
 
 	/**
 	 * Creates a new Rotation object
 	 */
 	public Rotation() {
-
+		this.setX(1);
 	}
 
 	/**
 	 * Creates a new Rotation object
 	 * 
-	 * @param theta
+	 * @param angle
 	 *            the specified rotation angle
 	 */
-	public Rotation(double theta) {
-		this.theta = theta;
+	public Rotation(double angle) {
+		this();
+		this.angle = angle;
 	}
 
 	/**
 	 * Creates a new Rotation object
 	 * 
-	 * @param theta
+	 * @param angle
 	 *            the specified rotation angle
 	 * @param axis
 	 *            the rotation axis
 	 */
-	public Rotation(double theta, Vector3 axis) {
-		this(theta);
-		this.setAxis(axis);
+	public Rotation(double angle, Vector3 axis) {
+		this(angle);
+		this.copy(axis);
 	}
 
 	/**
 	 * Creates a new Rotation object
 	 * 
-	 * @param theta
-	 *            the specified rotation angle
-	 * @param
+	 * @param x
+	 *            component of the rotation axis
+	 * @param y
+	 *            component of the rotation axis
+	 * @param z
+	 *            component of the rotation axis
+	 * @param angle
+	 *            the specifed rotation angle
 	 */
-	public Rotation(double theta, double x, double y, double z) {
-		this(theta);
-		this.setAxis(axis);
-	}
-
-	/**
-	 * Copies the values of another rotation into itself
-	 * 
-	 * @param rotation
-	 * @return itself
-	 */
-	public Rotation copy(Rotation rotation) {
-		this.theta = rotation.theta;
-		this.axis.copy(rotation.axis);
-		return this;
-	}
-
-	/**
-	 * Inverses the current rotation
-	 * 
-	 * @return itself
-	 */
-	public Rotation inverse() {
-		this.theta *= -1;
-		return this;
+	public Rotation(double x, double y, double z, double angle) {
+		this(angle);
+		this.set(x, y, z);
 	}
 
 	/**
@@ -82,38 +65,36 @@ public class Rotation {
 	 * @param scalar
 	 * @return itself
 	 */
-	public Rotation multiplyScalar(double scalar) {
-		this.theta *= scalar;
+	public Rotation multiplyAngle(double scalar) {
+		this.angle *= scalar;
 		return this;
 	}
 
 	/**
-	 * @return the theta
+	 * Sets the Rotation from a Quaternion.
+	 * 
+	 * @param quaternion
+	 * @return
 	 */
-	public double getTheta() {
-		return theta;
+	public Rotation fromQuaternion(Quaternion quaternion) {
+		this.angle = 2 * Math.acos(quaternion.getW());
+		this.copy(quaternion);
+		this.divideScalar(Math.sin(this.angle / 2));
+		return this;
 	}
 
 	/**
-	 * @param theta
-	 *            the theta to set
+	 * @return the angle
 	 */
-	public void setTheta(double theta) {
-		this.theta = theta;
+	public double getAngle() {
+		return angle;
 	}
 
 	/**
-	 * @return the axis
+	 * @param angle
+	 *            the angle to set
 	 */
-	public Vector3 getAxis() {
-		return axis;
-	}
-
-	/**
-	 * @param axis
-	 *            the axis to set
-	 */
-	public void setAxis(Vector3 axis) {
-		this.axis.copy(axis).normalize();
+	public void setAngle(double angle) {
+		this.angle = angle;
 	}
 }

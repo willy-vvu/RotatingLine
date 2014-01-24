@@ -114,13 +114,13 @@ public class Vector2 {
 	/**
 	 * Rotates a vector counter-clockwise by a given angle.
 	 * 
-	 * @param theta
+	 * @param angle
 	 * @return itself
 	 */
-	public Vector2 rotate(double theta) {
+	public Vector2 rotate(double angle) {
 		double tempX = x, tempY = y;
-		this.x = tempX * Math.cos(theta) - tempY * Math.sin(theta);
-		this.y = tempX * Math.sin(theta) + tempY * Math.cos(theta);
+		this.x = tempX * Math.cos(angle) - tempY * Math.sin(angle);
+		this.y = tempX * Math.sin(angle) + tempY * Math.cos(angle);
 		return this;
 	}
 

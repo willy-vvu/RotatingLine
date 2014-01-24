@@ -97,14 +97,14 @@ public class Matrix4 {
 	 * See http://en.wikipedia.org/wiki/Rotation_matrix#
 	 * Rotation_matrix_from_axis_and_angle
 	 * 
-	 * @param theta
+	 * @param angle
 	 * @param x
 	 * @param y
 	 * @param z
 	 * @return itself
 	 */
-	public Matrix4 setRotation(double theta, double x, double y, double z) {
-		double c = Math.cos(theta), d = 1 - c, s = 1 - c * c;
+	public Matrix4 setRotation(double angle, double x, double y, double z) {
+		double c = Math.cos(angle), d = 1 - c, s = 1 - c * c;
 		this.set(c + x * d, x * y * d - z * s, x * z * d + y * s, y * x * d + z
 				* s, c + y * d, y * z * d - x * s, z * x * d - y * s, z * y * d
 				+ x * s, c + z * d);
@@ -115,13 +115,13 @@ public class Matrix4 {
 	 * Sets the rotation portion of the matrix to a specified rotation around a
 	 * unit vector defined axis.
 	 * 
-	 * @param theta
+	 * @param angle
 	 * @param vector
 	 * @return itself
 	 */
-	public Matrix4 setRotation(double theta, Vector3 vector) {
+	public Matrix4 setRotation(double angle, Vector3 vector) {
 		return this.setRotation(vector.getX(), vector.getY(), vector.getZ(),
-				theta);
+				angle);
 	}
 
 	/**
@@ -131,40 +131,40 @@ public class Matrix4 {
 	 * @return itself
 	 */
 	public Matrix4 setRotation(Rotation rotation) {
-		return this.setRotation(rotation.getTheta(), rotation.getAxis());
+		return this.setRotation(rotation.getAngle(), rotation);
 	}
 
 	/**
 	 * Sets the rotation portion of the matrix to a specified rotation around
 	 * the x axis.
 	 * 
-	 * @param theta
+	 * @param angle
 	 * @return itself
 	 */
-	public Matrix4 setRotationX(double theta) {
-		return this.setRotation(1, 0, 0, theta);
+	public Matrix4 setRotationX(double angle) {
+		return this.setRotation(1, 0, 0, angle);
 	}
 
 	/**
 	 * Sets the rotation portion of the matrix to a specified rotation around
 	 * the y axis.
 	 * 
-	 * @param theta
+	 * @param angle
 	 * @return itself
 	 */
-	public Matrix4 setRotationY(double theta) {
-		return this.setRotation(0, 1, 0, theta);
+	public Matrix4 setRotationY(double angle) {
+		return this.setRotation(0, 1, 0, angle);
 	}
 
 	/**
 	 * Sets the rotation portion of the matrix to a specified rotation around
 	 * the z axis.
 	 * 
-	 * @param theta
+	 * @param angle
 	 * @return itself
 	 */
-	public Matrix4 setRotationZ(double theta) {
-		return this.setRotation(0, 0, 1, theta);
+	public Matrix4 setRotationZ(double angle) {
+		return this.setRotation(0, 0, 1, angle);
 	}
 
 	/**

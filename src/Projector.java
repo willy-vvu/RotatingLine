@@ -3,8 +3,8 @@ import java.util.ArrayList;
 /**
  * Projector.java
  * 
- * Projects an array of 3D points using a projection matrix onto an array of 2D
- * points.
+ * Projects an array of 3D points onto an array of 2D points from the
+ * perspective of a virtual camera.
  * 
  * Written Jan 23, 2014.
  * 
@@ -17,12 +17,24 @@ public class Projector {
 	private Vector3 position = new Vector3();
 	private static Vector3 tempVector3 = new Vector3();
 	private Rotation rotation = new Rotation();
-	private static Rotation tempRotation = new Rotation();
-	private Matrix4 cameraTransform = new Matrix4();
-	private static final Matrix4 tempMatrix = new Matrix4();
+	private Quaternion rotationQuaternion = new Quaternion();
 	private double fov = 45;
 	private double ez = 0;
 	private boolean needsRecomputation = true;
+
+	public static void main(String[] args) {
+		Projector p = new Projector(45);
+		p.rotation.set(0, 1, 0);
+		p.setScreenSize(new Vector2(2, 1));
+		ArrayList<Vector3> source = new ArrayList<Vector3>();
+		ArrayList<Vector2> destination = new ArrayList<Vector2>();
+		source.add(new Vector3(1, 1, 1));
+		source.add(new Vector3(-1, -1, 1));
+		source.add(new Vector3(1, -1, 2));
+		source.add(new Vector3(-1, 1, 2));
+		p.project(source, destination);
+		System.out.println(destination);
+	}
 
 	/**
 	 * Creates a new Projector
@@ -70,13 +82,16 @@ public class Projector {
 			compute();
 		}
 		for (int i = 0; i < source.size(); i++) {
-			tempVector3.copy(source.get(i)).multiplyMatrix(cameraTransform);
-			destination
-					.get(i)
-					.copy(tempVector3)
-					.divideScalar(
-							halfScreenSize.getX() * ez * tempVector3.getZ())
-					.add(halfScreenSize);
+			tempVector3.copy(source.get(i)).subtract(position)
+					.rotate(rotationQuaternion);
+			if (tempVector3.getZ() > 0) {
+				destination.get(i).copy(tempVector3)
+						.divideScalar(ez * tempVector3.getZ())
+						.multiplyScalar(halfScreenSize.getY())
+						.add(halfScreenSize);
+			} else {
+				destination.get(i).set(0, 0);
+			}
 		}
 		return destination;
 	}
@@ -88,11 +103,7 @@ public class Projector {
 	 */
 	private Projector compute() {
 		this.ez = 1 / Math.tan(Math.PI * this.fov / 360);
-		Projector.tempRotation.copy(rotation).inverse();
-		Projector.tempVector3.copy(position).inverse();
-		tempMatrix.makeIdentity().setRotation(tempRotation);
-		cameraTransform.makeIdentity().setTranslation(tempVector3)
-				.multiplyBeforeMatrix(tempMatrix);
+		rotationQuaternion.setFromRotation(this.rotation).inverse();
 		this.halfScreenSize.copy(screenSize).multiplyScalar(0.5);
 		needsRecomputation = false;
 		return this;
