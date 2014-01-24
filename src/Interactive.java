@@ -1,15 +1,23 @@
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.GridLayout;
 import java.awt.geom.Line2D;
 import java.util.ArrayList;
 import java.util.Date;
 
+import javax.swing.JButton;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JSlider;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 
 public class Interactive {
 
+	private InteractiveState state = new InteractiveState();
 	public static void main(String[] args) {
 		new Interactive();
 
@@ -38,7 +46,46 @@ public class Interactive {
 		controls.setLocation(850, 10);
 		controls.setSize(350, 800);
 		controls.setVisible(true);
+		
+		//creating overall control panel
+		JPanel overallControls = new JPanel();
+		overallControls.setLayout(new GridLayout(2, 1));
+		
+		
+		//creating panel for the buttons
+		state.speedSlider = new JSlider(0, 100, 10);
+		state.speedSlider.setMajorTickSpacing(50);
+		state.speedSlider.setMinorTickSpacing(10);
+		state.speedSlider.setPaintTicks(true);
+		state.speedSlider.setVisible(true);
+		state.speedSlider.addChangeListener(new ChangeListener() {
 
+			@Override
+			public void stateChanged(ChangeEvent e) 
+			{
+				state.setSpeed(state.speedSlider.getValue());
+			}
+		}
+
+		overallControls.add(state.speedSlider);
+		overallControls.setVisible(true);
+		
+		
+
+	}
+}
+class InteractiveState{
+	public boolean mouseDown = false;
+	public boolean rightMouseDown = false;
+	public boolean mouseInFrame = false;
+	public JSlider speedSlider = null;
+	public JButton toggleTool = null;
+	public JLabel rotationLabel = null;
+	public int speed = 0;
+	
+	public void setSpeed(int speed){
+		this.speed = (int) Math.max(Math.min(speed, 6), -6);
+		this.speedSlider.setValue(this.speed);
 	}
 }
 
@@ -101,3 +148,4 @@ class ShapeDrawingComponent extends JComponent {
 		}
 	}
 }
+	
