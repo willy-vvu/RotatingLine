@@ -108,7 +108,7 @@ public class Vector2 {
 	 * @return itself
 	 */
 	public Vector2 divideScalar(double scalar) {
-		return this.multiplyScalar(scalar == 0 ? 0 : 1 / scalar);
+		return this.multiplyScalar(scalar == 0 ? Double.NaN : 1 / scalar);
 	}
 
 	/**

@@ -104,7 +104,7 @@ public class Matrix4 {
 	 * @return itself
 	 */
 	public Matrix4 setRotation(double angle, double x, double y, double z) {
-		double c = Math.cos(angle), d = 1 - c, s = 1 - c * c;
+		double c = Math.cos(angle), d = 1 - c, s = Math.sqrt(1 - c * c);
 		this.set(c + x * d, x * y * d - z * s, x * z * d + y * s, y * x * d + z
 				* s, c + y * d, y * z * d - x * s, z * x * d - y * s, z * y * d
 				+ x * s, c + z * d);

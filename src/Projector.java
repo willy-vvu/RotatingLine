@@ -90,7 +90,7 @@ public class Projector {
 						.multiplyScalar(halfScreenSize.getY())
 						.add(halfScreenSize);
 			} else {
-				destination.get(i).set(0, 0);
+				destination.get(i).set(Double.NaN, Double.NaN);
 			}
 		}
 		return destination;

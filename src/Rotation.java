@@ -84,6 +84,15 @@ public class Rotation extends Vector3 {
 	}
 
 	/**
+	 * Adds a given angle to the rotation
+	 * 
+	 * @param angle
+	 */
+	public void add(double angle) {
+		this.angle += angle;
+	}
+
+	/**
 	 * @return the angle
 	 */
 	public double getAngle() {
@@ -97,4 +106,5 @@ public class Rotation extends Vector3 {
 	public void setAngle(double angle) {
 		this.angle = angle;
 	}
+
 }
