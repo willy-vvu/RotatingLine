@@ -95,7 +95,7 @@ class ShapeDrawingComponent extends JComponent {
 	private Vector2 containerSize = new Vector2();
 	private static final Color backgroundColor = new Color(255, 255, 255, 0);
 	private static final Color foregroundColor = new Color(0x000000);
-	public static Line2D.Double sharedLine = new Line2D.Double();
+	private static Line2D.Double sharedLine = new Line2D.Double();
 	private long lastTick = 0;
 
 	public ShapeDrawingComponent() {

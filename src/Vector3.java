@@ -10,8 +10,8 @@
  */
 public class Vector3 extends Vector2 {
 	private double z = 0;
-	private static Quaternion tempQ = new Quaternion();
-	private static Quaternion tempQ_2 = new Quaternion();
+	private static final Quaternion tempQ = new Quaternion();
+	private static final Quaternion tempQ_2 = new Quaternion();
 
 	/**
 	 * Creates a new, default Vector3, with the value (0,0,0)

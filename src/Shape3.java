@@ -21,10 +21,11 @@ import java.util.ArrayList;
 public class Shape3 extends Shape2 {
 	private ArrayList<Vector3> computed = new ArrayList<Vector3>(),
 			vertices = new ArrayList<Vector3>();
-	private ArrayList<Face> faces = new ArrayList<Face>();
+	private ArrayList<Line> lines = new ArrayList<Line>();
 	private double rotationSpeed = 0;
 	private Rotation rotation = new Rotation();
-	private static Quaternion tempQ = new Quaternion();
+	private static final Quaternion tempQ = new Quaternion();
+	private static final Vector3 tempV3 = new Vector3();
 	private int mode = Shape2.INFLATE;
 	private int A = 0, B = 0, C = 0, D = 0;
 	public static final int TETRAHEDRON = 0;
@@ -48,7 +49,7 @@ public class Shape3 extends Shape2 {
 		s.setContainerSize(new Vector3(100, 100, 100));
 		s.inscribe();
 		System.out.println(s.computed);
-		System.out.println(s.faces);
+		System.out.println(s.lines);
 	}
 
 	/**
@@ -66,7 +67,7 @@ public class Shape3 extends Shape2 {
 		if (preset == Shape3.TETRAHEDRON) {
 			this.set(0, 120, 0, 120);
 		} else if (preset == Shape3.CUBE) {
-			this.set(45, 90, 0, 90);
+			this.set(55, 71, 0, 90);
 		} else if (preset == Shape3.OCTAHEDRON) {
 			this.set(0, 90, 0, 90);
 		} else if (preset == Shape3.ICOSAHEDRON) {
@@ -138,9 +139,9 @@ public class Shape3 extends Shape2 {
 		while (computed.size() > numVertices) {
 			computed.remove(0);
 		}
-		faces.clear();
 		int vertex = 0;
-		int verticesInLastLayer = A == 0 ? 1 : 0;
+		int verticesInLastLayer = 0;
+		int line = 0;
 		for (int i = 0; i < layers; i++) {
 			int phiDegrees = A + B * i;
 			boolean specialLayer = (phiDegrees == 180 || phiDegrees == 0);
@@ -157,33 +158,55 @@ public class Shape3 extends Shape2 {
 				vertex++;
 			}
 			int verticesInLayer = specialLayer ? 1 : perLayer;
-			// Connect 'em up to form faces!
-			for (int j = 0; j < perLayer; j++) {
-				int a, b, c;
-
-				if (verticesInLayer > 1 && verticesInLastLayer > 0) {
-					// Previous: a *
-					// Current:: b c
-					a = startOfLayer - verticesInLastLayer + j
-							% verticesInLastLayer;
-					b = startOfLayer + j % verticesInLayer;
-					c = startOfLayer + ((j + 1) % verticesInLayer);
-					faces.add(new Face(a, b, c));
-				}
-				if (verticesInLastLayer > 1) {
-					// Previous: a c
-					// Current:: * b
-					a = startOfLayer - verticesInLastLayer + j
-							% verticesInLastLayer;
-					b = startOfLayer + j;
-					c = startOfLayer - verticesInLastLayer
-							+ ((j + 1) % verticesInLastLayer);
-					faces.add(new Face(a, b, c));
+			// Connect 'em up to form lines!
+			if (verticesInLayer > 1) {
+				// Form an edge loop
+				for (int j = 0; j < verticesInLayer; j++) {
+					line = setNextLine(line, startOfLayer + j, startOfLayer
+							+ (j + 1) % verticesInLayer);
 				}
 			}
-			verticesInLastLayer = phiDegrees == 0 ? 1 : perLayer;
+			if (phiDegrees == 180) {
+				// Form a bottom vertex fan
+				for (int j = 0; j < verticesInLastLayer; j++) {
+					line = setNextLine(line, startOfLayer - verticesInLastLayer
+							+ j, startOfLayer);
+				}
+			} else if (verticesInLastLayer > 0) {
+				// Connect upwards
+				for (int j = 0; j < verticesInLayer; j++) {
+					line = setNextLine(line, startOfLayer - verticesInLastLayer
+							+ j % verticesInLastLayer, startOfLayer + j);
+					if (C > 0 && verticesInLastLayer > 1) {
+						// Form upwards triangles
+						line = setNextLine(line, startOfLayer
+								- verticesInLastLayer + (j + 1)
+								% verticesInLastLayer, startOfLayer + j);
+					}
+				}
+			}
+			while (lines.size() > line) {
+				lines.remove(lines.size() - 1);
+			}
+			verticesInLastLayer = specialLayer ? 1 : perLayer;
 		}
 		return this;
+	}
+
+	/**
+	 * Sets the next line in the line array, creating a new object if necessary.
+	 * 
+	 * @param line
+	 * @param a
+	 * @param b
+	 * @return
+	 */
+	private int setNextLine(int line, int a, int b) {
+		if (line >= lines.size() - 1) {
+			lines.add(new Line());
+		}
+		lines.get(line).set(a, b);
+		return line + 1;
 	}
 
 	/**
@@ -205,11 +228,16 @@ public class Shape3 extends Shape2 {
 	 * @return itself
 	 */
 	public Shape3 transform() {
+		if (needsRecomputation) {
+			this.compute();
+		}
+		this.rotate();
 		if (this.mode == Shape2.INFLATE) {
 			this.inflate();
 		} else if (this.mode == Shape2.INSCRIBE) {
 			this.inscribe();
 		}
+		this.center();
 		return this;
 	}
 
@@ -219,11 +247,7 @@ public class Shape3 extends Shape2 {
 	 * 
 	 * @return itself
 	 */
-	public Shape3 inflate() {
-		if (needsRecomputation) {
-			this.compute();
-		}
-		this.rotate();
+	private Shape3 inflate() {
 		for (int i = 0; i < vertices.size(); i++) {
 			Vector3 currentVertex = this.vertices.get(i);
 			currentVertex.multiplyScalar(this.getToSide(currentVertex));
@@ -238,11 +262,7 @@ public class Shape3 extends Shape2 {
 	 * 
 	 * @return itself
 	 */
-	public Shape3 inscribe() {
-		if (needsRecomputation) {
-			this.compute();
-		}
-		this.rotate();
+	private Shape3 inscribe() {
 		// Find the minimum distance to a wall from any vertex
 		double minimumRadius = Double.POSITIVE_INFINITY;
 		for (int i = 0; i < vertices.size(); i++) {
@@ -252,6 +272,19 @@ public class Shape3 extends Shape2 {
 		// Set the radius of the polygon to that minimum distance
 		for (int i = 0; i < vertices.size(); i++) {
 			this.vertices.get(i).multiplyScalar(minimumRadius);
+		}
+		return this;
+	}
+
+	/**
+	 * Centers the shape in its bounding box.
+	 * 
+	 * @return itself
+	 */
+	private Shape3 center() {
+		tempV3.set(-0.5, -0.5, -0.5).add(this.center).multiply(containerSize);
+		for (int i = 0; i < vertices.size(); i++) {
+			vertices.get(i).add(tempV3);
 		}
 		return this;
 	}
@@ -409,10 +442,10 @@ public class Shape3 extends Shape2 {
 	}
 
 	/**
-	 * @return the faces
+	 * @return the lines
 	 */
-	public ArrayList<Face> getFaces() {
-		return faces;
+	public ArrayList<Line> getLines() {
+		return lines;
 	}
 
 	/**

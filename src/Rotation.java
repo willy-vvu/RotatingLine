@@ -76,7 +76,7 @@ public class Rotation extends Vector3 {
 	 * @param quaternion
 	 * @return
 	 */
-	public Rotation fromQuaternion(Quaternion quaternion) {
+	public Rotation setFromQuaternion(Quaternion quaternion) {
 		this.angle = 2 * Math.acos(quaternion.getW());
 		this.copy(quaternion);
 		this.divideScalar(Math.sin(this.angle / 2));

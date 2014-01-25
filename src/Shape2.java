@@ -21,7 +21,7 @@ public class Shape2 {
 	// Note that the center is between 0 and 1, relative to the container size.
 	private Vector2 center = new Vector2();
 	private Vector2 containerSize = null;
-	private static Vector2 temp = new Vector2();
+	private static final Vector2 temp = new Vector2();
 
 	/**
 	 * Tests out the Shape2 class and its methods.
@@ -122,11 +122,13 @@ public class Shape2 {
 	 * @return itself
 	 */
 	public Shape2 transform() {
+		this.compute();
 		if (this.mode == Shape2.INFLATE) {
 			this.inflate();
 		} else if (this.mode == Shape2.INSCRIBE) {
 			this.inscribe();
 		}
+		this.center();
 		return this;
 	}
 
@@ -136,13 +138,11 @@ public class Shape2 {
 	 * 
 	 * @return itself
 	 */
-	public Shape2 inflate() {
-		this.compute();
+	private Shape2 inflate() {
 		for (int i = 0; i < vertices.size(); i++) {
 			Vector2 currentVertex = this.vertices.get(i);
 			currentVertex.multiplyScalar(this.getToSide(currentVertex));
 		}
-		this.center();
 		return this;
 	}
 
@@ -168,8 +168,7 @@ public class Shape2 {
 	 * 
 	 * @return itself
 	 */
-	public Shape2 inscribe() {
-		this.compute();
+	private Shape2 inscribe() {
 		// Find the minimum distance to a wall from any vertex
 		double minimumRadius = Double.POSITIVE_INFINITY;
 		for (int i = 0; i < vertices.size(); i++) {
@@ -180,7 +179,6 @@ public class Shape2 {
 		for (int i = 0; i < vertices.size(); i++) {
 			this.vertices.get(i).multiplyScalar(minimumRadius);
 		}
-		this.center();
 		return this;
 	}
 
