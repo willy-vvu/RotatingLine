@@ -10,9 +10,8 @@
  */
 public class Vector3 extends Vector2 {
 	private double z = 0;
-	private static Vector3 tempV3 = new Vector3();
-	private static Vector3 tempV3_2 = new Vector3();
 	private static Quaternion tempQ = new Quaternion();
+	private static Quaternion tempQ_2 = new Quaternion();
 
 	/**
 	 * Creates a new, default Vector3, with the value (0,0,0)
@@ -184,13 +183,15 @@ public class Vector3 extends Vector2 {
 	 * @return itself
 	 */
 	public Vector3 rotate(Quaternion quaternion) {
-		// v+2r x (r x v+wv)
-		Vector3.tempV3.copy(this).multiplyScalar(quaternion.getW());
-		Vector3.tempV3_2.copy(quaternion).cross(this).add(Vector3.tempV3);
-		Vector3.tempV3.copy(quaternion).multiplyScalar(2)
-				.cross(Vector3.tempV3_2);
-		this.add(Vector3.tempV3);
-		// (quaternion.getW())
+		// p' = qpq
+		Vector3.tempQ_2.copy(this);
+		Vector3.tempQ_2.setW(0);
+		Vector3.tempQ.copy(quaternion);
+		Vector3.tempQ.multiply(Vector3.tempQ_2);
+		Vector3.tempQ_2.copy(quaternion);
+		Vector3.tempQ_2.inverse();
+		Vector3.tempQ.multiply(Vector3.tempQ_2);
+		this.copy(Vector3.tempQ);
 		return this;
 	}
 

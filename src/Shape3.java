@@ -33,9 +33,8 @@ public class Shape3 extends Shape2 {
 	public static final int ICOSAHEDRON = 3;
 
 	// Note that the center is between 0 and 1, relative to the container size.
-	private Vector3 center = new Vector3();
+	private Vector3 center = new Vector3(0.5, 0.5, 0.5);
 	private Vector3 containerSize = null;
-	private static Vector3 temp = new Vector3();
 	private boolean needsRecomputation = true;
 
 	/**
@@ -44,11 +43,12 @@ public class Shape3 extends Shape2 {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		Shape3 s = new Shape3(Shape3.TETRAHEDRON);
+		Shape3 s = new Shape3(Shape3.CUBE);
 		s.setCenter(new Vector3(0.5, 0.5, 0.5));
 		s.setContainerSize(new Vector3(100, 100, 100));
-		s.compute();
+		s.inscribe();
 		System.out.println(s.computed);
+		System.out.println(s.faces);
 	}
 
 	/**
@@ -146,16 +146,17 @@ public class Shape3 extends Shape2 {
 			boolean specialLayer = (phiDegrees == 180 || phiDegrees == 0);
 			// Make the vertices for this layer
 			int startOfLayer = vertex;
-			for (int j = 0; j < perLayer && !specialLayer || (j < 1)
-					&& specialLayer; j++) {
+			for (int j = 0; ((j < perLayer) && !specialLayer)
+					|| ((j < 1) && specialLayer); j++) {
 				int thetaDegrees = i * C + j * D;
-				double c = Math.cos(Math.PI * (90 + phiDegrees) / 180), d = Math
-						.cos(Math.PI * (thetaDegrees) / 180);
-				computed.get(vertex).set(c * d, c * Math.sqrt(1 - d * d),
-						Math.sqrt(1 - c * c));
+				double phi = Math.PI * (phiDegrees) / 180, theta = Math.PI
+						* (thetaDegrees + 45) / 180;
+				double ps = Math.sin(phi), pc = Math.cos(phi), tc = Math
+						.cos(theta), ts = Math.sin(theta);
+				computed.get(vertex).set(ps * tc, pc, ps * ts);
 				vertex++;
 			}
-			int verticesInLayer = phiDegrees == 180 ? 1 : perLayer;
+			int verticesInLayer = specialLayer ? 1 : perLayer;
 			// Connect 'em up to form faces!
 			for (int j = 0; j < perLayer; j++) {
 				int a, b, c;
@@ -180,15 +181,15 @@ public class Shape3 extends Shape2 {
 					faces.add(new Face(a, b, c));
 				}
 			}
-			verticesInLastLayer = perLayer;
+			verticesInLastLayer = phiDegrees == 0 ? 1 : perLayer;
 		}
 		return this;
 	}
 
 	/**
-	 * Recalculates the position of each vertex based on a specified rotation.
+	 * Recalculates the position of each vertex based on its rotation.
 	 * 
-	 * @return
+	 * @return itself
 	 */
 	private Shape3 rotate() {
 		Shape3.tempQ.setFromRotation(this.rotation);
@@ -224,24 +225,8 @@ public class Shape3 extends Shape2 {
 		}
 		this.rotate();
 		for (int i = 0; i < vertices.size(); i++) {
-			Vector2 currentVertex = this.vertices.get(i);
+			Vector3 currentVertex = this.vertices.get(i);
 			currentVertex.multiplyScalar(this.getToSide(currentVertex));
-		}
-		this.center();
-		return this;
-	}
-
-	/**
-	 * Centers the shape in the container.
-	 * 
-	 * @return itself
-	 */
-	private Shape3 center() {
-		// Get the offset to the center
-		Shape3.temp.copy(this.center).multiply(this.containerSize);
-		// Add to each vertex
-		for (int i = 0; i < vertices.size(); i++) {
-			this.vertices.get(i).add(Shape3.temp);
 		}
 		return this;
 	}
@@ -268,7 +253,6 @@ public class Shape3 extends Shape2 {
 		for (int i = 0; i < vertices.size(); i++) {
 			this.vertices.get(i).multiplyScalar(minimumRadius);
 		}
-		this.center();
 		return this;
 	}
 

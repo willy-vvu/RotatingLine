@@ -86,8 +86,8 @@ public class Projector {
 					.rotate(rotationQuaternion);
 			if (tempVector3.getZ() > 0) {
 				destination.get(i).copy(tempVector3)
-						.divideScalar(ez * tempVector3.getZ())
-						.multiplyScalar(halfScreenSize.getY())
+						.divideScalar(tempVector3.getZ())
+						.multiplyScalar(ez * halfScreenSize.getY())
 						.add(halfScreenSize);
 			} else {
 				destination.get(i).set(Double.NaN, Double.NaN);
@@ -101,7 +101,7 @@ public class Projector {
 	 * 
 	 * @return itself
 	 */
-	private Projector compute() {
+	public Projector compute() {
 		this.ez = 1 / Math.tan(Math.PI * this.fov / 360);
 		rotationQuaternion.setFromRotation(this.rotation).inverse();
 		this.halfScreenSize.copy(screenSize).multiplyScalar(0.5);

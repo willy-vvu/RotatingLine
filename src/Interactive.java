@@ -65,7 +65,7 @@ public class Interactive {
 			{
 				state.setSpeed(state.speedSlider.getValue());
 			}
-		}
+		});
 
 		overallControls.add(state.speedSlider);
 		overallControls.setVisible(true);

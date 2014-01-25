@@ -75,4 +75,34 @@ public class Quaternion extends Vector4 {
 		this.setW(-this.getW());
 		return this;
 	}
+
+	/**
+	 * Multiplies two Quaternions together using the Hamilton product.
+	 * 
+	 * @param quaternion
+	 * @return
+	 */
+	public Quaternion multiply(Quaternion quaternion) {
+		double tempW = this.getW() * quaternion.getW() - this.getX()
+				* quaternion.getX() - this.getY() * quaternion.getY()
+				- this.getZ() * quaternion.getZ(), tempX = this.getW()
+				* quaternion.getX() + this.getX() * quaternion.getW()
+				+ this.getY() * quaternion.getZ() - this.getZ()
+				* quaternion.getY(), tempY = this.getW() * quaternion.getY()
+				- this.getX() * quaternion.getZ() + this.getY()
+				* quaternion.getW() + this.getZ() * quaternion.getX(), tempZ = this
+				.getW()
+				* quaternion.getZ()
+				+ this.getX()
+				* quaternion.getY()
+				- this.getY()
+				* quaternion.getX()
+				+ this.getZ()
+				* quaternion.getW();
+		this.setW(tempW);
+		this.setX(tempX);
+		this.setY(tempY);
+		this.setZ(tempZ);
+		return this;
+	}
 }

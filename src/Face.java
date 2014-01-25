@@ -101,4 +101,29 @@ public class Face {
 		this.c = c;
 	}
 
+	/**
+	 * Gets the value at a given index to facilitate looping.
+	 * 
+	 * @param index
+	 *            0 -> a, 1 -> b, 2 -> c
+	 * @return
+	 */
+	public int getAt(int index) {
+		if (index == 0) {
+			return this.a;
+		} else if (index == 1) {
+			return this.b;
+		} else if (index == 2) {
+			return this.c;
+		}
+		return 0;
+	}
+
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		return "Face [a=" + a + ", b=" + b + ", c=" + c + "]";
+	}
 }
