@@ -52,6 +52,15 @@ public class Interactive {
 		// creating overall control panel
 		JPanel overallControls = new JPanel();
 		overallControls.setLayout(new GridLayout(2, 1));
+		JPanel speedSliderPanel = new JPanel();
+		speedSliderPanel.setLayout(new GridLayout(2,1));
+		JLabel speedSliderLabel = new JLabel("Rotation Speed", JLabel.CENTER);
+		speedSliderPanel.add(speedSliderLabel);
+		
+		JPanel sidesSliderPanel = new JPanel();
+		sidesSliderPanel.setLayout(new GridLayout(2,1));
+		JLabel sidesSliderLabel = new JLabel("Number of Sides", JLabel.CENTER);
+		sidesSliderPanel.add(sidesSliderLabel);
 
 		// creating panel for the buttons
 		state.speedSlider = new JSlider(-600, 600, 0);
@@ -67,10 +76,10 @@ public class Interactive {
 			}
 		});
 
-		overallControls.add(state.speedSlider);
+		//overallControls.add(state.speedSlider);
 		// creating panel for the buttons
 		state.sidesSlider = new JSlider(2, 10, 2);
-		state.sidesSlider.setMajorTickSpacing(5);
+		state.sidesSlider.setMajorTickSpacing(1);
 		state.sidesSlider.setMinorTickSpacing(1);
 		state.sidesSlider.setPaintTicks(true);
 		state.sidesSlider.setVisible(true);
@@ -82,9 +91,17 @@ public class Interactive {
 			}
 		});
 		
-		overallControls.add(state.sidesSlider);
-		overallControls.setVisible(true);
+		//overallControls.add(state.sidesSlider);
+		
 		controls.add(overallControls);
+		speedSliderPanel.add(state.speedSlider);
+		speedSliderPanel.setVisible(true);
+		sidesSliderPanel.add(state.sidesSlider);
+		sidesSliderPanel.setVisible(true);
+		overallControls.add(speedSliderPanel);
+		overallControls.add(sidesSliderPanel);
+		overallControls.setVisible(true);
+		
 		state.selectShape(state.shapes.get(0));
 	}
 }
