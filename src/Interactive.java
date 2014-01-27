@@ -16,14 +16,15 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 public class Interactive {
+	private InteractiveState state;
 
-	private InteractiveState state = new InteractiveState();
 	public static void main(String[] args) {
 		new Interactive();
 
 	}
 
 	public Interactive() {
+		state = new InteractiveState();
 		// Create frame
 		JFrame frame = new JFrame();
 		// Center and size the frame
@@ -33,7 +34,8 @@ public class Interactive {
 		frame.setTitle("Rotating Line Project");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		// Add the Drawing component
-		ShapeDrawingComponent drawingComponent = new ShapeDrawingComponent();
+		ShapeDrawingComponent drawingComponent = new ShapeDrawingComponent(
+				state);
 		frame.add(drawingComponent);
 		// Make it visible
 		frame.setVisible(true);
@@ -46,62 +48,99 @@ public class Interactive {
 		controls.setLocation(850, 10);
 		controls.setSize(350, 800);
 		controls.setVisible(true);
-		
-		//creating overall control panel
+
+		// creating overall control panel
 		JPanel overallControls = new JPanel();
 		overallControls.setLayout(new GridLayout(2, 1));
-		
-		
-		//creating panel for the buttons
-		state.speedSlider = new JSlider(0, 100, 10);
-		state.speedSlider.setMajorTickSpacing(50);
-		state.speedSlider.setMinorTickSpacing(10);
+
+		// creating panel for the buttons
+		state.speedSlider = new JSlider(-600, 600, 0);
+		state.speedSlider.setMajorTickSpacing(200);
+		state.speedSlider.setMinorTickSpacing(50);
 		state.speedSlider.setPaintTicks(true);
 		state.speedSlider.setVisible(true);
 		state.speedSlider.addChangeListener(new ChangeListener() {
 
 			@Override
-			public void stateChanged(ChangeEvent e) 
-			{
+			public void stateChanged(ChangeEvent e) {
 				state.setSpeed(state.speedSlider.getValue());
 			}
 		});
 
 		overallControls.add(state.speedSlider);
+		// creating panel for the buttons
+		state.sidesSlider = new JSlider(2, 10, 2);
+		state.sidesSlider.setMajorTickSpacing(5);
+		state.sidesSlider.setMinorTickSpacing(1);
+		state.sidesSlider.setPaintTicks(true);
+		state.sidesSlider.setVisible(true);
+		state.sidesSlider.addChangeListener(new ChangeListener() {
+			
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				state.setSides(state.sidesSlider.getValue());
+			}
+		});
+		
+		overallControls.add(state.sidesSlider);
 		overallControls.setVisible(true);
-		
-		
-
+		controls.add(overallControls);
+		state.selectShape(state.shapes.get(0));
 	}
 }
-class InteractiveState{
+
+class InteractiveState {
 	public boolean mouseDown = false;
 	public boolean rightMouseDown = false;
 	public boolean mouseInFrame = false;
 	public JSlider speedSlider = null;
+	public JSlider sidesSlider = null;
 	public JButton toggleTool = null;
 	public JLabel rotationLabel = null;
 	public int speed = 0;
-	
-	public void setSpeed(int speed){
-		this.speed = (int) Math.max(Math.min(speed, 6), -6);
-		this.speedSlider.setValue(this.speed);
+	public Shape2 selectedShape = null;
+	public ArrayList<Shape2> shapes = new ArrayList<Shape2>();
+
+	public void setSpeed(int speed) {
+		if (selectedShape != null) {
+			selectedShape.setRotationSpeed(Math.max(Math.min(speed * .01, 6),
+					-6));
+		}
+	}
+
+	public void setSides(int value) {
+		if (selectedShape != null) {
+			selectedShape.setSides(Math.max(Math.min(value, 10),
+					2));
+		}
+	}
+
+	public void selectShape(Shape2 shape) {
+		selectedShape = shape;
+		speedSlider.setValue((int) (selectedShape.getRotationSpeed() * 100));
+		sidesSlider.setValue(selectedShape.getSides());
 	}
 }
 
 class ShapeDrawingComponent extends JComponent {
 	private static final long serialVersionUID = 1L;
-	private ArrayList<Shape2> shapes = new ArrayList<Shape2>();
+
 	private Vector2 containerSize = new Vector2();
 	private static final Color backgroundColor = new Color(255, 255, 255, 0);
 	private static final Color foregroundColor = new Color(0x000000);
 	private static Line2D.Double sharedLine = new Line2D.Double();
 	private long lastTick = 0;
+	private InteractiveState state;
 
-	public ShapeDrawingComponent() {
-		shapes.add(new Shape2(5, new Vector2(0.5, 0.5), 1, Shape2.INFLATE));
-		shapes.add(new Shape2(3, new Vector2(0.2, 0.5), -0.4, Shape2.INSCRIBE));
-		shapes.add(new Shape2(2, new Vector2(0.5, 0.3), .3, Shape2.INFLATE));
+	public ShapeDrawingComponent(InteractiveState state) {
+		this.state = state;
+		state.shapes
+				.add(new Shape2(5, new Vector2(0.5, 0.5), 1, Shape2.INFLATE));
+		state.shapes.add(new Shape2(3, new Vector2(0.2, 0.5), -0.4,
+				Shape2.INSCRIBE));
+		state.shapes.add(new Shape2(2, new Vector2(0.5, 0.3), .3,
+				Shape2.INFLATE));
+		
 	}
 
 	public void paintComponent(Graphics graphics) {
@@ -117,8 +156,8 @@ class ShapeDrawingComponent extends JComponent {
 		double timeElapsed = (lastTick == 0 ? 0 : (currentTime - lastTick)) * 0.001;
 		lastTick = currentTime;
 		// Compute, draw and advance all shapes
-		for (int i = 0; i < shapes.size(); i++) {
-			Shape2 currentShape = shapes.get(i);
+		for (int i = 0; i < state.shapes.size(); i++) {
+			Shape2 currentShape = state.shapes.get(i);
 
 			// lets the shape know how big the window is
 			currentShape.setContainerSize(containerSize);
@@ -148,4 +187,3 @@ class ShapeDrawingComponent extends JComponent {
 		}
 	}
 }
-	
