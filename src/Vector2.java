@@ -112,6 +112,15 @@ public class Vector2 {
 	}
 
 	/**
+	 * Normalizes the vector (converts it into a unit vector).
+	 * 
+	 * @return itself
+	 */
+	public Vector2 normalize() {
+		return this.divideScalar(this.length());
+	}
+
+	/**
 	 * Rotates a vector counter-clockwise by a given angle.
 	 * 
 	 * @param angle
@@ -131,6 +140,32 @@ public class Vector2 {
 	 */
 	public Vector2 inverse() {
 		return this.multiplyScalar(-1);
+	}
+
+	/**
+	 * @param vector
+	 * @return the dot product of the two vectors.
+	 */
+	public double dot(Vector2 vector) {
+		return this.x * vector.x + this.y * vector.y;
+	}
+
+	/**
+	 * 
+	 * @param vector
+	 * @return the length (magnitude) squared of the current vector.
+	 */
+	public double lengthSquared() {
+		return this.dot(this);
+	}
+
+	/**
+	 * 
+	 * @param vector
+	 * @return the length (magnitude) of the current vector.
+	 */
+	public double length() {
+		return Math.sqrt(this.lengthSquared());
 	}
 
 	/**

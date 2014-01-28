@@ -116,21 +116,13 @@ public class Vector4 extends Vector3 {
 	}
 
 	/**
-	 * 
-	 * @return the length (magnitude) of the vector.
-	 */
-	public double length() {
-		return Vector4
-				.hypotenuse(this.getX(), this.getY(), this.getZ(), this.w);
-	}
-
-	/**
-	 * Converts the vector into a unit vector.
+	 * Normalizes the vector (converts it into a unit vector).
 	 * 
 	 * @return itself
 	 */
-	public Vector4 normalize() {
-		return this.divideScalar(this.length());
+	public Vector3 normalize() {
+		super.normalize();
+		return this;
 	}
 
 	/**
@@ -169,6 +161,14 @@ public class Vector4 extends Vector3 {
 	public Vector4 inverse() {
 		super.inverse();
 		return this;
+	}
+
+	/**
+	 * @param vector
+	 * @return the dot product of the two vectors.
+	 */
+	public double dot(Vector4 vector) {
+		return super.dot(vector) + this.w * vector.w;
 	}
 
 	/**

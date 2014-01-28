@@ -116,20 +116,13 @@ public class Vector3 extends Vector2 {
 	}
 
 	/**
-	 * 
-	 * @return the length (magnitude) of the vector.
-	 */
-	public double length() {
-		return Vector3.hypotenuse(this.getX(), this.getY(), this.z);
-	}
-
-	/**
-	 * Converts the vector into a unit vector.
+	 * Normalizes the vector (converts it into a unit vector).
 	 * 
 	 * @return itself
 	 */
 	public Vector3 normalize() {
-		return this.divideScalar(this.length());
+		super.normalize();
+		return this;
 	}
 
 	/**
@@ -204,6 +197,14 @@ public class Vector3 extends Vector2 {
 	public Vector3 rotate(Rotation rotation) {
 		Vector3.tempQ.setFromRotation(rotation);
 		return this.rotate(Vector3.tempQ);
+	}
+
+	/**
+	 * @param vector
+	 * @return the dot product of the two vectors.
+	 */
+	public double dot(Vector3 vector) {
+		return super.dot(vector) + this.z * vector.z;
 	}
 
 	/**
