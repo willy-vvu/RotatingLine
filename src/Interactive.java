@@ -181,8 +181,11 @@ public class Interactive {
 		speedSliderPanel.setVisible(true);
 		sidesSliderPanel.add(state.sidesSlider);
 		sidesSliderPanel.setVisible(true);
-		overallControls.add(state.inscribeButton);
-		overallControls.add(state.inflateButton);
+		JPanel shapeStatePanel = new JPanel();
+		shapeStatePanel.setLayout(new GridLayout(1, 2));
+		shapeStatePanel.add(state.inscribeButton);
+		shapeStatePanel.add(state.inflateButton);
+		overallControls.add(shapeStatePanel);
 		overallControls.add(speedSliderPanel);
 		overallControls.add(sidesSliderPanel);
 		overallControls.setVisible(true);
