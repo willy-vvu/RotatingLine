@@ -29,7 +29,7 @@ public class Shape3 extends Shape2 {
 	private int mode = Shape2.INFLATE;
 	private int A = 0, B = 0, C = 0, D = 0;
 	public static final int TETRAHEDRON = 0;
-	public static final int CUBE = 1;
+	public static final int HEXAHEDRON = 1;
 	public static final int OCTAHEDRON = 2;
 	public static final int ICOSAHEDRON = 3;
 
@@ -44,7 +44,7 @@ public class Shape3 extends Shape2 {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		Shape3 s = new Shape3(Shape3.CUBE);
+		Shape3 s = new Shape3(Shape3.HEXAHEDRON);
 		s.setCenter(new Vector3(0.5, 0.5, 0.5));
 		s.setContainerSize(new Vector3(100, 100, 100));
 		s.inscribe();
@@ -64,15 +64,27 @@ public class Shape3 extends Shape2 {
 	 * @param preset
 	 */
 	public Shape3(int preset) {
+		this.setPreset(preset);
+	}
+
+	/**
+	 * Sets the parameters of the shape to a given preset.
+	 * 
+	 * @param preset
+	 *            A preset constant.
+	 * @return itself
+	 */
+	public Shape3 setPreset(int preset) {
 		if (preset == Shape3.TETRAHEDRON) {
 			this.set(0, 120, 0, 120);
-		} else if (preset == Shape3.CUBE) {
+		} else if (preset == Shape3.HEXAHEDRON) {
 			this.set(55, 71, 0, 90);
 		} else if (preset == Shape3.OCTAHEDRON) {
 			this.set(0, 90, 0, 90);
 		} else if (preset == Shape3.ICOSAHEDRON) {
 			this.set(0, 60, 36, 72);
 		}
+		return this;
 	}
 
 	/**
