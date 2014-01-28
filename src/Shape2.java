@@ -21,7 +21,8 @@ public class Shape2 {
 	// Note that the center is between 0 and 1, relative to the container size.
 	private Vector2 center = new Vector2();
 	private Vector2 containerSize = null;
-	private static final Vector2 temp = new Vector2();
+	private static final Vector2 tempV2 = new Vector2();
+	private static final Vector2 tempV2_2 = new Vector2();
 
 	/**
 	 * Tests out the Shape2 class and its methods.
@@ -32,9 +33,7 @@ public class Shape2 {
 		Shape2 s = new Shape2(3);
 		s.setCenter(new Vector2(0.5, 0.5));
 		s.setContainerSize(new Vector2(100, 100));
-		s.inflate();
-		System.out.println(s);
-		s.inscribe();
+		s.transform();
 		System.out.println(s);
 	}
 
@@ -153,10 +152,10 @@ public class Shape2 {
 	 */
 	private Shape2 center() {
 		// Get the offset to the center
-		Shape2.temp.copy(this.center).multiply(this.containerSize);
+		Shape2.tempV2.copy(this.center).multiply(this.containerSize);
 		// Add to each vertex
 		for (int i = 0; i < vertices.size(); i++) {
-			this.vertices.get(i).add(Shape2.temp);
+			this.vertices.get(i).add(Shape2.tempV2);
 		}
 		return this;
 	}
@@ -212,6 +211,35 @@ public class Shape2 {
 		}
 		// Return whichever distance is closer, wall or ceiling.
 		return Math.min(distanceToWallPoint, distanceToFloorPoint);
+	}
+
+	/**
+	 * Returns the minimum distance from a given point to any of the shape's
+	 * edges, using the formula:
+	 * 
+	 * dist = |(a-p)-((a-p) . n) n|
+	 * 
+	 * Where the line is the parametric vector equation a + n t n is a unit
+	 * vector defining the line direction p is the point in consideration
+	 * 
+	 * @param point
+	 * @return
+	 */
+	public double edgeToPoint(Vector2 point) {
+		double minDistSquared = Double.POSITIVE_INFINITY;
+		for (int i = 0; i < vertices.size(); i++) {
+			Vector2 pointA = vertices.get(i), pointB = vertices.get((i + 1)
+					% vertices.size());
+			// Compute and save a-p
+			tempV2.copy(pointA).subtract(point);
+			// Compute n
+			tempV2_2.copy(pointB).subtract(pointA).normalize();
+			// Compute ((a-p) . n) n
+			tempV2_2.multiplyScalar(tempV2_2.dot(tempV2));
+			minDistSquared = Math.min(minDistSquared, tempV2.subtract(tempV2_2)
+					.lengthSquared());
+		}
+		return Math.sqrt(minDistSquared);
 	}
 
 	/**
