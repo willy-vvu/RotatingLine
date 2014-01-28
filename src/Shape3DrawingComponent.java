@@ -48,7 +48,7 @@ public class Shape3DrawingComponent extends JComponent {
 	private ArrayList<Shape3> shapes = new ArrayList<Shape3>();
 	private static ArrayList<Vector2> projected = new ArrayList<Vector2>();
 	private Vector2 containerSize = new Vector2();
-	private Vector3 boxSize = new Vector3(10, 15, 10);
+	private Vector3 boxSize = new Vector3(10, 10, 10);
 	private Vector3 view = new Vector3(0.001, 0.001, -30);
 	private Vector3 viewVelocity = new Vector3(0, 0, 0);
 	private Vector2 mousePosition = new Vector2();
@@ -68,12 +68,25 @@ public class Shape3DrawingComponent extends JComponent {
 	private static Vector3 tempV3 = new Vector3();
 
 	public Shape3DrawingComponent() {
+<<<<<<< HEAD
 		Shape3 shape = new Shape3(Shape3.TETRAHEDRON, 1);
 		shape.getCenter().set(0.4,0.6,0.5);
 		shape.get3DRotation().set(1, 1, 1).normalize();
 		shape.setMode(Shape3.INFLATE);
+=======
+		Shape3 shape = new Shape3(Shape3.ICOSAHEDRON, 1);
+		shape.getCenter().set(0.5,0.5,0.5);
+		shape.get3DRotation().set(1,1,1).normalize();
+		shape.setMode(Shape3.INSCRIBE);
+>>>>>>> 03cd362
 		shapes.add(shape);
 
+//		Shape3 shape2 = new Shape3(Shape3.HEXAHEDRON, 1);
+//		shape2.getCenter().set(0.1,0.2,0.3);
+//		shape2.get3DRotation().set(-1,-1,1).normalize();
+//		shape2.setMode(Shape3.INFLATE);
+//		shapes.add(shape2);
+		
 		// Listen for mouse clicks
 		this.addMouseListener(new MouseListener() {
 
@@ -213,6 +226,7 @@ public class Shape3DrawingComponent extends JComponent {
 			tempV3.copy(viewVelocity).multiplyScalar(50 * timeElapsed);
 			view.add(tempV3);
 		}
+		viewVelocity.multiplyScalar(0.999);
 		view.setY(Math.min(Math.max(-Math.PI / 2, view.getY()), Math.PI / 2));
 		projector.setScreenSize(containerSize);
 		tempQ.setAxisAngle(view.getX(), yAxis);
