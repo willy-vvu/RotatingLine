@@ -1,7 +1,10 @@
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 import java.awt.geom.Line2D;
 import java.util.ArrayList;
 import java.util.Date;
@@ -11,6 +14,7 @@ import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.JSlider;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
@@ -51,7 +55,7 @@ public class Interactive {
 
 		// creating overall control panel
 		JPanel overallControls = new JPanel();
-		overallControls.setLayout(new GridLayout(2, 1));
+		overallControls.setLayout(new GridLayout(4, 1));
 		JPanel speedSliderPanel = new JPanel();
 		speedSliderPanel.setLayout(new GridLayout(2,1));
 		JLabel speedSliderLabel = new JLabel("Rotation Speed", JLabel.CENTER);
@@ -77,7 +81,7 @@ public class Interactive {
 		});
 
 		//overallControls.add(state.speedSlider);
-		// creating panel for the buttons
+		// creating sidesSlider
 		state.sidesSlider = new JSlider(2, 10, 2);
 		state.sidesSlider.setMajorTickSpacing(1);
 		state.sidesSlider.setMinorTickSpacing(1);
@@ -91,16 +95,99 @@ public class Interactive {
 			}
 		});
 		
-		//overallControls.add(state.sidesSlider);
+		state.inscribeButton = new JButton("Inscribe");
+		state.inscribeButton.addMouseListener(new MouseListener(){
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				state.inscribeButton.setEnabled(true);
+				state.inflateButton.setEnabled(false);
+				state.selectedShape.setMode(1);
+				
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+		});
+		
+	
+		
+		state.inflateButton = new JButton("Inflate");
+		
+		state.inflateButton.addMouseListener(new MouseListener(){
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				state.inscribeButton.setEnabled(false);
+				state.inflateButton.setEnabled(true);
+				state.selectedShape.setMode(0);
+				
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+		});
+
+		
+		
+		overallControls.repaint();
 		
 		controls.add(overallControls);
 		speedSliderPanel.add(state.speedSlider);
 		speedSliderPanel.setVisible(true);
 		sidesSliderPanel.add(state.sidesSlider);
 		sidesSliderPanel.setVisible(true);
+		overallControls.add(state.inscribeButton);
+		overallControls.add(state.inflateButton);
 		overallControls.add(speedSliderPanel);
 		overallControls.add(sidesSliderPanel);
 		overallControls.setVisible(true);
+		controls.repaint();
+		overallControls.repaint();
 		
 		state.selectShape(state.shapes.get(0));
 	}
@@ -112,7 +199,8 @@ class InteractiveState {
 	public boolean mouseInFrame = false;
 	public JSlider speedSlider = null;
 	public JSlider sidesSlider = null;
-	public JButton toggleTool = null;
+	public JButton inscribeButton = null;
+	public JButton inflateButton = null;
 	public JLabel rotationLabel = null;
 	public int speed = 0;
 	public Shape2 selectedShape = null;
@@ -145,6 +233,9 @@ class ShapeDrawingComponent extends JComponent {
 	private Vector2 containerSize = new Vector2();
 	private static final Color backgroundColor = new Color(255, 255, 255, 0);
 	private static final Color foregroundColor = new Color(0x000000);
+	private static final Color selectedColor = new Color(0,0,255);
+	private static final BasicStroke thickLine = new BasicStroke(5);
+	private static final BasicStroke thinLine = new BasicStroke(1);
 	private static Line2D.Double sharedLine = new Line2D.Double();
 	private long lastTick = 0;
 	private InteractiveState state;
@@ -194,6 +285,14 @@ class ShapeDrawingComponent extends JComponent {
 	 * @param shape
 	 */
 	private void drawShape(Graphics2D g, Shape2 shape) {
+		if(state.selectedShape== shape){
+			g.setColor(selectedColor);
+			g.setStroke(thickLine);
+		}
+		else{
+			g.setColor(foregroundColor);
+			g.setStroke(thinLine);
+		}
 		ArrayList<Vector2> vertices = shape.getVertices();
 		for (int i = 0; i < vertices.size(); i++) {
 			Vector2 fromVertex = vertices.get(i);
