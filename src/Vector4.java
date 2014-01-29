@@ -172,6 +172,24 @@ public class Vector4 extends Vector3 {
 	}
 
 	/**
+	 * 
+	 * @param vector
+	 * @return the length (magnitude) squared of the current vector.
+	 */
+	public double lengthSquared() {
+		return this.dot(this);
+	}
+
+	/**
+	 * 
+	 * @param vector
+	 * @return the length (magnitude) of the current vector.
+	 */
+	public double length() {
+		return Math.sqrt(this.lengthSquared());
+	}
+
+	/**
 	 * Use the pythagorean theorem on x, y, z, and w.
 	 * 
 	 * @param x
