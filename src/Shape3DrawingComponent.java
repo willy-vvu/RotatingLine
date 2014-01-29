@@ -68,17 +68,10 @@ public class Shape3DrawingComponent extends JComponent {
 	private static Vector3 tempV3 = new Vector3();
 
 	public Shape3DrawingComponent() {
-<<<<<<< HEAD
-		Shape3 shape = new Shape3(Shape3.TETRAHEDRON, 1);
-		shape.getCenter().set(0.4,0.6,0.5);
-		shape.get3DRotation().set(1, 1, 1).normalize();
-		shape.setMode(Shape3.INFLATE);
-=======
 		Shape3 shape = new Shape3(Shape3.ICOSAHEDRON, 1);
 		shape.getCenter().set(0.5,0.5,0.5);
 		shape.get3DRotation().set(1,1,1).normalize();
 		shape.setMode(Shape3.INSCRIBE);
->>>>>>> 03cd362
 		shapes.add(shape);
 
 //		Shape3 shape2 = new Shape3(Shape3.HEXAHEDRON, 1);
