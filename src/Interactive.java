@@ -5,6 +5,7 @@ import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
@@ -57,7 +58,7 @@ public class Interactive {
 
 		// creating overall control panel
 		JPanel overallControls = new JPanel();
-		overallControls.setLayout(new GridLayout(4, 1));
+		overallControls.setLayout(new GridLayout(5, 1));
 		JPanel speedSliderPanel = new JPanel();
 		speedSliderPanel.setLayout(new GridLayout(2,1));
 		JLabel speedSliderLabel = new JLabel("Rotation Speed", JLabel.CENTER);
@@ -291,6 +292,35 @@ class ShapeDrawingComponent extends JComponent {
 				Shape2.INSCRIBE));
 		state.shapes.add(new Shape2(2, new Vector2(0.5, 0.3), .3,
 				Shape2.INFLATE));
+		this.addMouseMotionListener(new MouseMotionListener() {
+
+			@Override
+			public void mouseDragged(MouseEvent e) {
+				//TODO
+				for (int i = 0; i < state.shapes.size(); i++) {
+					if(state.shapes.get(i) == state.selectedShape){
+						double fudgeFactor = 50;
+						double x = state.shapes.get(i).getCenter().getX() * containerSize.getX();
+						double y =state.shapes.get(i).getCenter().getY() * containerSize.getY();
+						if ((x <= e.getLocationOnScreen().x + fudgeFactor && x >= e.getLocationOnScreen().x - fudgeFactor)
+									&& (y <= e.getLocationOnScreen().y + fudgeFactor 
+										&& y >= e.getLocationOnScreen().y - fudgeFactor))
+						{
+							//TODO figure out why you have to adjust when moving the center
+							state.shapes.get(i).setCenter(new Vector2((e.getLocationOnScreen().x -17)/ containerSize.getX(), 
+									(e.getLocationOnScreen().y-42)/containerSize.getY()));
+							//this.repaint();
+						}
+					}
+				}
+			}
+
+			@Override
+			public void mouseMoved(MouseEvent e) {
+				
+			}
+			
+		});
 		this.addMouseListener(new MouseListener() {
 			
 			@Override
@@ -301,19 +331,6 @@ class ShapeDrawingComponent extends JComponent {
 			
 			@Override
 			public void mousePressed(MouseEvent e) {
-				//TODO more stuff
-				for (int i = 0; i < state.shapes.size(); i++) {
-					double fudgeFactor = 50;
-					double x = state.shapes.get(i).getCenter().getX() * containerSize.getX();
-					double y =state.shapes.get(i).getCenter().getY() * containerSize.getY();
-					if ((x <= e.getLocationOnScreen().x + fudgeFactor && x >= e.getLocationOnScreen().x - fudgeFactor)
-								&& (y <= e.getLocationOnScreen().y + fudgeFactor 
-									&& y >= e.getLocationOnScreen().y - fudgeFactor))
-					{
-						state.selectShape(state.shapes.get(i));
-						
-					}
-				}
 				
 				
 			}
@@ -332,7 +349,19 @@ class ShapeDrawingComponent extends JComponent {
 			
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				
+				//TODO more stuff
+				for (int i = 0; i < state.shapes.size(); i++) {
+					double fudgeFactor = 50;
+					double x = state.shapes.get(i).getCenter().getX() * containerSize.getX();
+					double y =state.shapes.get(i).getCenter().getY() * containerSize.getY();
+					if ((x <= e.getLocationOnScreen().x + fudgeFactor && x >= e.getLocationOnScreen().x - fudgeFactor)
+								&& (y <= e.getLocationOnScreen().y + fudgeFactor 
+									&& y >= e.getLocationOnScreen().y - fudgeFactor))
+					{
+						state.selectShape(state.shapes.get(i));
+						
+					}
+				}
 				
 			}
 		});
