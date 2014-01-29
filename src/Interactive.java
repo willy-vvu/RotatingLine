@@ -303,11 +303,9 @@ class ShapeDrawingComponent extends JComponent {
 			public void mousePressed(MouseEvent e) {
 				//TODO more stuff
 				for (int i = 0; i < state.shapes.size(); i++) {
-					double fudgeFactor = 100;
+					double fudgeFactor = 50;
 					double x = state.shapes.get(i).getCenter().getX() * containerSize.getX();
 					double y =state.shapes.get(i).getCenter().getY() * containerSize.getY();
-					System.out.println(x + "\n" + y);
-					System.out.println(e.getLocationOnScreen().x + fudgeFactor);
 					if ((x <= e.getLocationOnScreen().x + fudgeFactor && x >= e.getLocationOnScreen().x - fudgeFactor)
 								&& (y <= e.getLocationOnScreen().y + fudgeFactor 
 									&& y >= e.getLocationOnScreen().y - fudgeFactor))
