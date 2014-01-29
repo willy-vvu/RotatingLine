@@ -51,7 +51,7 @@ public class Interactive {
 		controls.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		controls.setLocation(850, 10);
 		controls.setSize(350, 800);
-		controls.setVisible(true);
+		
 
 		// creating overall control panel
 		JPanel overallControls = new JPanel();
@@ -71,7 +71,7 @@ public class Interactive {
 		state.speedSlider.setMajorTickSpacing(200);
 		state.speedSlider.setMinorTickSpacing(50);
 		state.speedSlider.setPaintTicks(true);
-		state.speedSlider.setVisible(true);
+		//state.speedSlider.setVisible(true);
 		state.speedSlider.addChangeListener(new ChangeListener() {
 
 			@Override
@@ -82,11 +82,11 @@ public class Interactive {
 
 		//overallControls.add(state.speedSlider);
 		// creating sidesSlider
-		state.sidesSlider = new JSlider(2, 10, 2);
+		state.sidesSlider = new JSlider(2, 18, 2);
 		state.sidesSlider.setMajorTickSpacing(1);
 		state.sidesSlider.setMinorTickSpacing(1);
 		state.sidesSlider.setPaintTicks(true);
-		state.sidesSlider.setVisible(true);
+		//state.sidesSlider.setVisible(true);
 		state.sidesSlider.addChangeListener(new ChangeListener() {
 			
 			@Override
@@ -100,33 +100,33 @@ public class Interactive {
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				state.inscribeButton.setEnabled(true);
-				state.inflateButton.setEnabled(false);
+				state.inscribeButton.setEnabled(false);
+				state.inflateButton.setEnabled(true);
 				state.selectedShape.setMode(1);
 				
 			}
 
 			@Override
 			public void mouseEntered(MouseEvent e) {
-				// TODO Auto-generated method stub
+				
 				
 			}
 
 			@Override
 			public void mouseExited(MouseEvent e) {
-				// TODO Auto-generated method stub
+				
 				
 			}
 
 			@Override
 			public void mousePressed(MouseEvent e) {
-				// TODO Auto-generated method stub
+				
 				
 			}
 
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				// TODO Auto-generated method stub
+				
 				
 			}
 			
@@ -140,47 +140,80 @@ public class Interactive {
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				state.inscribeButton.setEnabled(false);
-				state.inflateButton.setEnabled(true);
+				state.inscribeButton.setEnabled(true);
+				state.inflateButton.setEnabled(false);
 				state.selectedShape.setMode(0);
 				
 			}
 
 			@Override
 			public void mouseEntered(MouseEvent e) {
-				// TODO Auto-generated method stub
+				
 				
 			}
 
 			@Override
 			public void mouseExited(MouseEvent e) {
-				// TODO Auto-generated method stub
+				
 				
 			}
 
 			@Override
 			public void mousePressed(MouseEvent e) {
-				// TODO Auto-generated method stub
+				
 				
 			}
 
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				// TODO Auto-generated method stub
+				
 				
 			}
 			
 		});
+		
+		state.addShapeButton = new JButton("Add Shape");
+		state.addShapeButton.addMouseListener(new MouseListener(){
 
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				Shape2 shape = new Shape2(2);
+				shape.getCenter().set(0.5, 0.5);
+				state.shapes.add(shape);
+				state.selectShape(shape);
+
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				
+				
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				
+			}
+			
+		});
 		
+		//overallControls.repaint();
+		//controls.repaint();
 		
-		overallControls.repaint();
-		
-		controls.add(overallControls);
 		speedSliderPanel.add(state.speedSlider);
-		speedSliderPanel.setVisible(true);
+		//speedSliderPanel.setVisible(true);
+		//sidesSliderPanel.setVisible(true);
 		sidesSliderPanel.add(state.sidesSlider);
-		sidesSliderPanel.setVisible(true);
 		JPanel shapeStatePanel = new JPanel();
 		shapeStatePanel.setLayout(new GridLayout(1, 2));
 		shapeStatePanel.add(state.inscribeButton);
@@ -188,15 +221,19 @@ public class Interactive {
 		overallControls.add(shapeStatePanel);
 		overallControls.add(speedSliderPanel);
 		overallControls.add(sidesSliderPanel);
-		overallControls.setVisible(true);
-		controls.repaint();
-		overallControls.repaint();
+		overallControls.add(state.addShapeButton);
+		//overallControls.setVisible(true);
 		
+		//overallControls.repaint();
+		//controls.repaint();
+		controls.add(overallControls);
+		controls.setVisible(true);
 		state.selectShape(state.shapes.get(0));
 	}
 }
 
 class InteractiveState {
+	public JButton addShapeButton=null;
 	public boolean mouseDown = false;
 	public boolean rightMouseDown = false;
 	public boolean mouseInFrame = false;
@@ -218,7 +255,7 @@ class InteractiveState {
 
 	public void setSides(int value) {
 		if (selectedShape != null) {
-			selectedShape.setSides(Math.max(Math.min(value, 10),
+			selectedShape.setSides(Math.max(Math.min(value, 18),
 					2));
 		}
 	}
@@ -243,7 +280,7 @@ class ShapeDrawingComponent extends JComponent {
 	private long lastTick = 0;
 	private InteractiveState state;
 
-	public ShapeDrawingComponent(InteractiveState state) {
+	public ShapeDrawingComponent(final InteractiveState state) {
 		this.state = state;
 		state.shapes
 				.add(new Shape2(5, new Vector2(0.5, 0.5), 1, Shape2.INFLATE));
@@ -251,7 +288,38 @@ class ShapeDrawingComponent extends JComponent {
 				Shape2.INSCRIBE));
 		state.shapes.add(new Shape2(2, new Vector2(0.5, 0.3), .3,
 				Shape2.INFLATE));
-		
+		this.addMouseListener(new MouseListener() {
+			
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				
+				
+			}
+			
+			@Override
+			public void mousePressed(MouseEvent e) {
+				//TODO more stuff 
+				//state.selectShape(shape);
+			}
+			
+			@Override
+			public void mouseExited(MouseEvent e) {
+				
+				
+			}
+			
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				
+				
+			}
+			
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				
+				
+			}
+		});
 	}
 
 	public void paintComponent(Graphics graphics) {
