@@ -5,7 +5,9 @@ import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -277,6 +279,7 @@ class ShapeDrawingComponent extends JComponent {
 	private static final BasicStroke thickLine = new BasicStroke(5);
 	private static final BasicStroke thinLine = new BasicStroke(1);
 	private static Line2D.Double sharedLine = new Line2D.Double();
+	private static Ellipse2D.Double center = new Ellipse2D.Double();
 	private long lastTick = 0;
 	private InteractiveState state;
 
@@ -298,8 +301,23 @@ class ShapeDrawingComponent extends JComponent {
 			
 			@Override
 			public void mousePressed(MouseEvent e) {
-				//TODO more stuff 
-				//state.selectShape(shape);
+				//TODO more stuff
+				for (int i = 0; i < state.shapes.size(); i++) {
+					double fudgeFactor = 100;
+					double x = state.shapes.get(i).getCenter().getX() * containerSize.getX();
+					double y =state.shapes.get(i).getCenter().getY() * containerSize.getY();
+					System.out.println(x + "\n" + y);
+					System.out.println(e.getLocationOnScreen().x + fudgeFactor);
+					if ((x <= e.getLocationOnScreen().x + fudgeFactor && x >= e.getLocationOnScreen().x - fudgeFactor)
+								&& (y <= e.getLocationOnScreen().y + fudgeFactor 
+									&& y >= e.getLocationOnScreen().y - fudgeFactor))
+					{
+						state.selectShape(state.shapes.get(i));
+						
+					}
+				}
+				
+				
 			}
 			
 			@Override
@@ -359,10 +377,14 @@ class ShapeDrawingComponent extends JComponent {
 		if(state.selectedShape== shape){
 			g.setColor(selectedColor);
 			g.setStroke(thickLine);
-		}
+			center.setFrame(shape.getCenter().getX() * this.containerSize.getX() -2.5 , shape.getCenter().getY() * this.containerSize.getY() -2.5 , 5, 5);
+			g.draw(center);
+		} 
 		else{
 			g.setColor(foregroundColor);
 			g.setStroke(thinLine);
+			center.setFrame(shape.getCenter().getX() * this.containerSize.getX() -2.5 , shape.getCenter().getY() * this.containerSize.getY() -2.5 , 5, 5);
+			g.draw(center);
 		}
 		ArrayList<Vector2> vertices = shape.getVertices();
 		for (int i = 0; i < vertices.size(); i++) {
