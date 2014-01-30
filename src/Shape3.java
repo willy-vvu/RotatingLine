@@ -3,7 +3,8 @@ import java.util.ArrayList;
 /**
  * Shape3.java
  * 
- * A 3 dimensional polyhedra that computes and transforms its vertices.
+ * A 2 dimensional ngon (if sides>0) or 3 dimensional polyhedra that computes
+ * and transforms its vertices.
  * 
  * A 3d polyhedra defined by four values: A, B, C, D
  * 
@@ -18,23 +19,23 @@ import java.util.ArrayList;
  * @author William Wu
  * 
  */
-public class Shape3 extends Shape2 {
-	private ArrayList<Vector3> computed = new ArrayList<Vector3>(),
-			vertices = new ArrayList<Vector3>();
-	private ArrayList<Line> lines = new ArrayList<Line>();
+public class Shape3 extends Mesh {
+	private ArrayList<Vector3> computed = new ArrayList<Vector3>();
 	private double rotationSpeed = 0;
-	private Rotation rotation = new Rotation();
+	private Rotation rotation = new Rotation(0, 0, 1, 0);
 	private static final Quaternion tempQ = new Quaternion();
 	private static final Vector3 tempV3 = new Vector3();
-	private int mode = Shape2.INFLATE;
+	private byte mode = Shape3.INFLATE;
 	private int A = 0, B = 0, C = 0, D = 0;
-	public static final int TETRAHEDRON = 0;
-	public static final int HEXAHEDRON = 1;
-	public static final int OCTAHEDRON = 2;
-	public static final int ICOSAHEDRON = 3;
-
+	public static final int TETRAHEDRON = -3;
+	public static final int HEXAHEDRON = -6;
+	public static final int OCTAHEDRON = -8;
+	public static final int ICOSAHEDRON = -12;
+	private int sides = 0;
+	public static final byte INFLATE = 0;
+	public static final byte INSCRIBE = 1;
 	// Note that the center is between 0 and 1, relative to the container size.
-	private Vector3 center = new Vector3(0.5, 0.5, 0.5);
+	private Vector3 center = new Vector3(0.5);
 	private Vector3 containerSize = null;
 	private boolean needsRecomputation = true;
 
@@ -45,11 +46,11 @@ public class Shape3 extends Shape2 {
 	 */
 	public static void main(String[] args) {
 		Shape3 s = new Shape3(Shape3.HEXAHEDRON);
-		s.setCenter(new Vector3(0.5, 0.5, 0.5));
-		s.setContainerSize(new Vector3(100, 100, 100));
+		s.setCenter(new Vector3(0.5));
+		s.setContainerSize(new Vector3(100));
 		s.inscribe();
 		System.out.println(s.computed);
-		System.out.println(s.lines);
+		System.out.println(s.getLines());
 	}
 
 	/**
@@ -59,12 +60,16 @@ public class Shape3 extends Shape2 {
 	}
 
 	/**
-	 * Create a new shape from a given preset.
+	 * Create a new ngon with a given number of sides, or a preset
 	 * 
-	 * @param preset
+	 * @param sides
 	 */
-	public Shape3(int preset) {
-		this.setPreset(preset);
+	public Shape3(int sides) {
+		if (sides > 0) {
+			this.setSides(sides);
+		} else {
+			this.setPreset(sides);
+		}
 	}
 
 	/**
@@ -90,11 +95,15 @@ public class Shape3 extends Shape2 {
 	/**
 	 * Create a new shape from a given preset and rotation speed.
 	 * 
-	 * @param preset
+	 * @param sides
 	 * @param rotationSpeed
 	 */
-	public Shape3(int preset, double rotationSpeed) {
-		this(preset);
+	public Shape3(int sides, double rotationSpeed) {
+		if (sides > 0) {
+			this.setSides(sides);
+		} else {
+			this.setPreset(sides);
+		}
 		this.rotationSpeed = rotationSpeed;
 	}
 
@@ -131,19 +140,24 @@ public class Shape3 extends Shape2 {
 	 * @return itself
 	 */
 	private Shape3 compute() {
-		// Calculate the number of vertices to resize the ArrayLists
-		int layers = (1 + (180 - A) / B);
-		int perLayer = 360 / D;
-		int specialLayers = (A == 0 ? 1 : 0) + ((180 - A) % B == 0 ? 1 : 0);
-		int numVertices = specialLayers + perLayer * (layers - specialLayers);
-		// Resize the vertex array to match the number of vertices in the shape
-		while (vertices.size() < numVertices) {
-			// Fewer vertices? No problem.
-			vertices.add(new Vector3());
+		int numVertices = 0;
+		if (getSides() > 0) {
+			numVertices = getSides();
+		} else {
+			// Calculate the number of vertices to resize the ArrayLists
+			int layers = (1 + (180 - A) / B);
+			int perLayer = 360 / D;
+			int specialLayers = (A == 0 ? 1 : 0) + ((180 - A) % B == 0 ? 1 : 0);
+			numVertices = specialLayers + perLayer * (layers - specialLayers);
 		}
-		while (vertices.size() > numVertices) {
+		// Resize the vertex array to match the number of vertices in the shape
+		while (getVertices().size() < numVertices) {
+			// Fewer vertices? No problem.
+			getVertices().add(new Vector3());
+		}
+		while (getVertices().size() > numVertices) {
 			// More vertices? We've got that covered.
-			vertices.remove(0);
+			getVertices().remove(0);
 		}
 		while (computed.size() < numVertices) {
 			computed.add(new Vector3());
@@ -151,6 +165,38 @@ public class Shape3 extends Shape2 {
 		while (computed.size() > numVertices) {
 			computed.remove(0);
 		}
+		if (getSides() > 0) {
+			compute2D();
+		} else {
+			compute3D();
+		}
+		return this;
+	}
+
+	/**
+	 * Builds a 2D n-gon.
+	 */
+	private void compute2D() {
+		double deltaTheta = 2 * Math.PI / this.getSides();
+		while (getLines().size() > computed.size()) {
+			getLines().remove(0);
+		}
+		while (getLines().size() < computed.size()) {
+			getLines().add(new Line());
+		}
+		for (int i = 0; i < computed.size(); i++) {
+			computed.get(i).set(1, 0, 0).rotate(i * deltaTheta);
+			getLines().get(i).set(i, (i + 1) % computed.size());
+		}
+	}
+
+	/**
+	 * Builds a 3D regular polyhedron.
+	 */
+	private void compute3D() {
+		// Calculate the number of vertices to resize the ArrayLists
+		int layers = (1 + (180 - A) / B);
+		int perLayer = 360 / D;
 		int vertex = 0;
 		int verticesInLastLayer = 0;
 		int line = 0;
@@ -197,12 +243,11 @@ public class Shape3 extends Shape2 {
 					}
 				}
 			}
-			while (lines.size() > line) {
-				lines.remove(lines.size() - 1);
+			while (getLines().size() > line) {
+				getLines().remove(getLines().size() - 1);
 			}
 			verticesInLastLayer = specialLayer ? 1 : perLayer;
 		}
-		return this;
 	}
 
 	/**
@@ -214,10 +259,10 @@ public class Shape3 extends Shape2 {
 	 * @return
 	 */
 	private int setNextLine(int line, int a, int b) {
-		if (line >= lines.size() - 1) {
-			lines.add(new Line());
+		if (line >= getLines().size() - 1) {
+			getLines().add(new Line());
 		}
-		lines.get(line).set(a, b);
+		getLines().get(line).set(a, b);
 		return line + 1;
 	}
 
@@ -228,28 +273,30 @@ public class Shape3 extends Shape2 {
 	 */
 	private Shape3 rotate() {
 		Shape3.tempQ.setFromRotation(this.rotation);
-		for (int i = 0; i < vertices.size(); i++) {
-			vertices.get(i).copy(computed.get(i)).rotate(Shape3.tempQ);
+		for (int i = 0; i < getVertices().size(); i++) {
+			getVertices().get(i).copy(computed.get(i)).rotate(Shape3.tempQ);
 		}
 		return this;
 	}
 
 	/**
-	 * Transforms (inflates or inscribes) the shape based on its mode
+	 * Transforms (inflates or inscribes) the shape based on its mode, then
+	 * projects it given a projector.
 	 * 
 	 * @return itself
 	 */
-	public Shape3 transform() {
-		if (needsRecomputation) {
+	public Shape3 transform(Projector projector) {
+		if (this.needsRecomputation) {
 			this.compute();
 		}
 		this.rotate();
-		if (this.mode == Shape2.INFLATE) {
+		if (this.mode == Shape3.INFLATE) {
 			this.inflate();
-		} else if (this.mode == Shape2.INSCRIBE) {
+		} else if (this.mode == Shape3.INSCRIBE) {
 			this.inscribe();
 		}
 		this.center();
+		this.project(projector);
 		return this;
 	}
 
@@ -259,9 +306,9 @@ public class Shape3 extends Shape2 {
 	 * 
 	 * @return itself
 	 */
-	private Shape3 inflate() {
-		for (int i = 0; i < vertices.size(); i++) {
-			Vector3 currentVertex = this.vertices.get(i);
+	protected Shape3 inflate() {
+		for (int i = 0; i < getVertices().size(); i++) {
+			Vector3 currentVertex = this.getVertices().get(i);
 			currentVertex.multiplyScalar(this.getToSide(currentVertex));
 		}
 		return this;
@@ -274,16 +321,16 @@ public class Shape3 extends Shape2 {
 	 * 
 	 * @return itself
 	 */
-	private Shape3 inscribe() {
+	protected Shape3 inscribe() {
 		// Find the minimum distance to a wall from any vertex
 		double minimumRadius = Double.POSITIVE_INFINITY;
-		for (int i = 0; i < vertices.size(); i++) {
+		for (int i = 0; i < getVertices().size(); i++) {
 			minimumRadius = Math.min(minimumRadius,
-					this.getToSide(this.vertices.get(i)));
+					this.getToSide(this.getVertices().get(i)));
 		}
 		// Set the radius of the polygon to that minimum distance
-		for (int i = 0; i < vertices.size(); i++) {
-			this.vertices.get(i).multiplyScalar(minimumRadius);
+		for (int i = 0; i < getVertices().size(); i++) {
+			this.getVertices().get(i).multiplyScalar(minimumRadius);
 		}
 		return this;
 	}
@@ -295,8 +342,8 @@ public class Shape3 extends Shape2 {
 	 */
 	private Shape3 center() {
 		tempV3.set(-0.5, -0.5, -0.5).add(this.center).multiply(containerSize);
-		for (int i = 0; i < vertices.size(); i++) {
-			vertices.get(i).add(tempV3);
+		for (int i = 0; i < getVertices().size(); i++) {
+			getVertices().get(i).add(tempV3);
 		}
 		return this;
 	}
@@ -308,7 +355,7 @@ public class Shape3 extends Shape2 {
 	 * @return
 	 */
 	public double getToSide(Vector3 vector) {
-		double distanceToXPoint = Double.POSITIVE_INFINITY, distanceToYPoint = Double.POSITIVE_INFINITY, distanceToZPoint = Double.POSITIVE_INFINITY, distanceMultiplier = 0;
+		double distanceToXPoint = Double.POSITIVE_INFINITY, distanceToYPoint = Double.POSITIVE_INFINITY, distanceToZPoint = Double.POSITIVE_INFINITY;
 		if (vector.getX() != 0) {
 			// Find the x distance to the left or right wall.
 			double distanceToX = vector.getX() > 0 ? this.containerSize.getX()
@@ -316,9 +363,8 @@ public class Shape3 extends Shape2 {
 					* this.containerSize.getX();
 			// Find the total distance to projected point on the left or right
 			// wall.
-			distanceMultiplier = distanceToX / vector.getX();
-			distanceToXPoint = Vector3.hypotenuse(distanceToX, vector.getY()
-					* distanceMultiplier, vector.getZ() * distanceMultiplier);
+
+			distanceToXPoint = distanceToX / Math.abs(vector.getX());
 		}
 		if (vector.getY() != 0) {
 			// Find the y distance to the ceiling or floor.
@@ -327,9 +373,7 @@ public class Shape3 extends Shape2 {
 					* this.containerSize.getY();
 			// Find the total distance to projected point on the ceiling or
 			// floor.
-			distanceMultiplier = distanceToY / vector.getY();
-			distanceToYPoint = Vector3.hypotenuse(distanceToY, vector.getX()
-					* distanceMultiplier, vector.getZ() * distanceMultiplier);
+			distanceToYPoint = distanceToY / Math.abs(vector.getY());
 		}
 		if (vector.getZ() != 0) {
 			// Find the z distance to the front or back.
@@ -338,9 +382,7 @@ public class Shape3 extends Shape2 {
 					* this.containerSize.getZ();
 			// Find the total distance to projected point on the front or back
 			// wall.
-			distanceMultiplier = distanceToZ / vector.getZ();
-			distanceToZPoint = Vector3.hypotenuse(distanceToZ, vector.getX()
-					* distanceMultiplier, vector.getY() * distanceMultiplier);
+			distanceToZPoint = distanceToZ / Math.abs(vector.getZ());
 		}
 		// Return whichever distance is closer, wall or ceiling.
 		return Math.min(distanceToXPoint,
@@ -363,7 +405,7 @@ public class Shape3 extends Shape2 {
 	 * @return the vertices
 	 */
 	public ArrayList<Vector3> get3DVertices() {
-		return vertices;
+		return getVertices();
 	}
 
 	/**
@@ -379,7 +421,6 @@ public class Shape3 extends Shape2 {
 	 */
 	public void setRotationSpeed(double rotationSpeed) {
 		this.rotationSpeed = rotationSpeed;
-		needsRecomputation = true;
 	}
 
 	/**
@@ -395,7 +436,6 @@ public class Shape3 extends Shape2 {
 	 */
 	public void setRotation(Rotation rotation) {
 		this.rotation.copy(rotation);
-		needsRecomputation = true;
 	}
 
 	/**
@@ -411,7 +451,6 @@ public class Shape3 extends Shape2 {
 	 */
 	public void setCenter(Vector3 center) {
 		this.center = center;
-		needsRecomputation = true;
 	}
 
 	/**
@@ -427,20 +466,19 @@ public class Shape3 extends Shape2 {
 	 */
 	public void setContainerSize(Vector3 containerSize) {
 		this.containerSize = containerSize;
-		needsRecomputation = true;
 	}
 
 	/**
 	 * Returns the vertices that form the shape.
 	 */
 	public String toString() {
-		return this.vertices.toString();
+		return this.getVertices().toString();
 	}
 
 	/**
 	 * @return the mode
 	 */
-	public int getMode() {
+	public byte getMode() {
 		return mode;
 	}
 
@@ -448,16 +486,8 @@ public class Shape3 extends Shape2 {
 	 * @param mode
 	 *            the mode to set
 	 */
-	public void setMode(int mode) {
+	public void setMode(byte mode) {
 		this.mode = mode;
-		needsRecomputation = true;
-	}
-
-	/**
-	 * @return the lines
-	 */
-	public ArrayList<Line> getLines() {
-		return lines;
 	}
 
 	/**
@@ -523,4 +553,21 @@ public class Shape3 extends Shape2 {
 		D = d;
 		needsRecomputation = true;
 	}
+
+	/**
+	 * @return the sides
+	 */
+	public int getSides() {
+		return sides;
+	}
+
+	/**
+	 * @param sides
+	 *            the sides to set
+	 */
+	public void setSides(int sides) {
+		this.sides = sides;
+		this.needsRecomputation = true;
+	}
+
 }

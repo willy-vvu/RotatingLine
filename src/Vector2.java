@@ -19,6 +19,22 @@ public class Vector2 {
 	}
 
 	/**
+	 * Creates a Vector2 based on another Vector2.
+	 */
+	public Vector2(Vector2 vector) {
+		this.copy(vector);
+	}
+
+	/**
+	 * Creates a new Vector2 both x and y set to a given value.
+	 * 
+	 * @param r
+	 */
+	public Vector2(double r) {
+		this.set(r, r);
+	}
+
+	/**
 	 * Creates a new Vector2 with the given x and y
 	 * 
 	 * @param x
@@ -169,6 +185,35 @@ public class Vector2 {
 	}
 
 	/**
+	 * 
+	 * @param vector
+	 * @return the distance to another vector squared
+	 */
+	public double distanceToSquared(Vector2 vector) {
+		return hypotenuseSquared(this.x - vector.x, this.y - vector.y);
+	}
+
+	/**
+	 * 
+	 * @param vector
+	 * @return the distance to another vector squared
+	 */
+	public double distanceTo(Vector2 vector) {
+		return Math.sqrt(distanceToSquared(vector));
+	}
+
+	/**
+	 * Use the half the pythagorean theorem on x and y.
+	 * 
+	 * @param x
+	 * @param y
+	 * @return the hypotenuse squared
+	 */
+	public static double hypotenuseSquared(double x, double y) {
+		return x * x + y * y;
+	}
+
+	/**
 	 * Use the pythagorean theorem on x and y.
 	 * 
 	 * @param x
@@ -176,7 +221,7 @@ public class Vector2 {
 	 * @return the hypotenuse
 	 */
 	public static double hypotenuse(double x, double y) {
-		return Math.sqrt(x * x + y * y);
+		return Math.sqrt(hypotenuseSquared(x, y));
 	}
 
 	/**

@@ -13,11 +13,6 @@ import java.util.Date;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 
-import jssc.SerialPort;
-import jssc.SerialPortEvent;
-import jssc.SerialPortEventListener;
-import jssc.SerialPortException;
-
 /**
  * Shape3DrawingComponent.java
  * 
@@ -29,7 +24,6 @@ import jssc.SerialPortException;
  * 
  */
 public class Shape3DrawingComponent extends JComponent {
-	static SerialPort serialPort;
 
 	/**
 	 * @param args
@@ -52,8 +46,9 @@ public class Shape3DrawingComponent extends JComponent {
 
 	private static final long serialVersionUID = 1L;
 	private ArrayList<Shape3> shapes = new ArrayList<Shape3>();
+	private static ArrayList<Vector2> projected = new ArrayList<Vector2>();
 	private Vector2 containerSize = new Vector2();
-	private Vector3 boxSize = new Vector3(10, 10, 5);
+	private Vector3 boxSize = new Vector3(10, 10, 10);
 	private Vector3 view = new Vector3(0.001, 0.001, -30);
 	private Vector3 viewVelocity = new Vector3(0, 0, 0);
 	private Vector2 mousePosition = new Vector2();
@@ -67,24 +62,24 @@ public class Shape3DrawingComponent extends JComponent {
 	private static final Quaternion tempQ_2 = new Quaternion();
 	private static final Vector3 yAxis = new Vector3(0, 1, 0);
 	private static final Vector3 xAxis = new Vector3(1, 0, 0);
-	private static final Vector2 tempV2 = new Vector2();
 	private long lastTick = 0;
+	private ArrayList<Vector3> cube = new ArrayList<Vector3>();
+	private ArrayList<Line> cubeLines = new ArrayList<Line>();
 	private static Vector3 tempV3 = new Vector3();
-	private CubeGeometry boundingCubeGeo = new CubeGeometry(boxSize);
-	private Mesh boundingCube = new Mesh(boundingCubeGeo);
 
 	public Shape3DrawingComponent() {
-		Shape3 shape = new Shape3(6, 1);
-		shape.getCenter().set(0.5, 0.5, 0.5);
-		// shape.get3DRotation().set(1, 1, 1).normalize();
+		Shape3 shape = new Shape3(Shape3.ICOSAHEDRON, 1);
+		shape.getCenter().set(0.5,0.5,0.5);
+		shape.get3DRotation().set(1,1,1).normalize();
 		shape.setMode(Shape3.INSCRIBE);
 		shapes.add(shape);
 
-		Shape3 shape2 = new Shape3(Shape3.ICOSAHEDRON, 1);
-		shape2.get3DRotation().set(1, -1, -1).normalize();
-		shape2.setMode(Shape3.INSCRIBE);
-		shapes.add(shape2);
-
+//		Shape3 shape2 = new Shape3(Shape3.HEXAHEDRON, 1);
+//		shape2.getCenter().set(0.1,0.2,0.3);
+//		shape2.get3DRotation().set(-1,-1,1).normalize();
+//		shape2.setMode(Shape3.INFLATE);
+//		shapes.add(shape2);
+		
 		// Listen for mouse clicks
 		this.addMouseListener(new MouseListener() {
 
@@ -122,18 +117,6 @@ public class Shape3DrawingComponent extends JComponent {
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				tempV2.set(e.getX(), e.getY());
-				Shape3 selection = null;
-				double minDistToSelected = Double.POSITIVE_INFINITY;
-				for (int i = 0; i < shapes.size(); i++) {
-					Shape3 currentShape = shapes.get(i);
-					double currentDist = currentShape.edgeToPoint(tempV2);
-					if (currentDist < minDistToSelected) {
-						minDistToSelected = currentDist;
-						selection = currentShape;
-					}
-				}
-				System.out.println(selection);
 			}
 		});
 		// Listen for and handle mouse motion
@@ -169,31 +152,51 @@ public class Shape3DrawingComponent extends JComponent {
 						-10));
 			}
 		});
-		serialPort = new SerialPort("COM3");
-		try {
-			serialPort.openPort();// Open port
-			serialPort.setParams(9600, 8, 1, 0);// Set params
-			int mask = SerialPort.MASK_RXCHAR;// Prepare mask
-			serialPort.setEventsMask(mask);// Set mask
-			serialPort.addEventListener(new SerialPortEventListener() {
-				@Override
-				public void serialEvent(SerialPortEvent event) {
-					if (event.isRXCHAR()) {// If data is available
-						try {
-							byte[] in = serialPort.readBytes(1);
-							double amount = -0.001 * (in[0]);
-							viewVelocity.setX(viewVelocity.getX() * amount < 0 ? amount
-									: viewVelocity.getX() + amount);
-						} catch (Exception e) {
-							System.out.println(e);
-						}
-					}
-				}
-			});
-		} catch (SerialPortException ex) {
-			System.out.println(ex);
-		}
 
+		// Build bounding cube
+		cube.add(new Vector3());
+		cube.add(new Vector3());
+		cube.add(new Vector3());
+		cube.add(new Vector3());
+		cube.add(new Vector3());
+		cube.add(new Vector3());
+		cube.add(new Vector3());
+		cube.add(new Vector3());
+		computeCubeVertices();
+		cubeLines.add(new Line(0, 1));
+		cubeLines.add(new Line(0, 2));
+		cubeLines.add(new Line(1, 3));
+		cubeLines.add(new Line(2, 3));
+		cubeLines.add(new Line(4, 5));
+		cubeLines.add(new Line(4, 6));
+		cubeLines.add(new Line(5, 7));
+		cubeLines.add(new Line(6, 7));
+		cubeLines.add(new Line(0, 4));
+		cubeLines.add(new Line(1, 5));
+		cubeLines.add(new Line(2, 6));
+		cubeLines.add(new Line(3, 7));
+	}
+
+	/**
+	 * Recomputes the vertices of the bounding cube.
+	 */
+	private void computeCubeVertices() {
+		cube.get(0).set(boxSize.getX(), boxSize.getY(), boxSize.getZ())
+				.multiplyScalar(0.5);
+		cube.get(1).set(boxSize.getX(), boxSize.getY(), -boxSize.getZ())
+				.multiplyScalar(0.5);
+		cube.get(2).set(-boxSize.getX(), boxSize.getY(), boxSize.getZ())
+				.multiplyScalar(0.5);
+		cube.get(3).set(-boxSize.getX(), boxSize.getY(), -boxSize.getZ())
+				.multiplyScalar(0.5);
+		cube.get(4).set(boxSize.getX(), -boxSize.getY(), boxSize.getZ())
+				.multiplyScalar(0.5);
+		cube.get(5).set(boxSize.getX(), -boxSize.getY(), -boxSize.getZ())
+				.multiplyScalar(0.5);
+		cube.get(6).set(-boxSize.getX(), -boxSize.getY(), boxSize.getZ())
+				.multiplyScalar(0.5);
+		cube.get(7).set(-boxSize.getX(), -boxSize.getY(), -boxSize.getZ())
+				.multiplyScalar(0.5);
 	}
 
 	public void paintComponent(Graphics graphics) {
@@ -226,16 +229,16 @@ public class Shape3DrawingComponent extends JComponent {
 		projector.getPosition().set(0, 0, view.getZ()).rotate(tempQ);
 
 		// Draw bounding box
-		boundingCube.project(projector);
-		this.drawLines(g, boundingCube);
+		this.drawLines(g, cube, cubeLines);
 
 		// Compute, draw and advance all shapes
 		for (int i = 0; i < shapes.size(); i++) {
 			Shape3 currentShape = shapes.get(i);
 			currentShape.setContainerSize(boxSize);
-			currentShape.transform(projector);
-			this.drawLines(g, currentShape);
-			this.drawVertices(g, currentShape);
+			currentShape.transform();
+			this.drawLines(g, currentShape.get3DVertices(),
+					currentShape.getLines());
+			this.drawVertices(g, currentShape.get3DVertices());
 			currentShape.step(timeElapsed);
 		}
 
@@ -248,13 +251,16 @@ public class Shape3DrawingComponent extends JComponent {
 	 * {@link Line}s joining them to a given graphics context.
 	 * 
 	 * @param g
-	 * @param mesh
+	 * @param vertices
+	 * @param lines
 	 */
-	private void drawLines(Graphics2D g, Mesh mesh) {
-		for (int i = 0; i < mesh.getLines().size(); i++) {
-			Line currentLine = mesh.getLines().get(i);
-			Vector2 fromVertex = mesh.getProjected().get(currentLine.getA());
-			Vector2 toVertex = mesh.getProjected().get(currentLine.getB());
+	private void drawLines(Graphics2D g, ArrayList<Vector3> vertices,
+			ArrayList<Line> lines) {
+		projector.project(vertices, projected);
+		for (int i = 0; i < lines.size(); i++) {
+			Line currentLine = lines.get(i);
+			Vector2 fromVertex = projected.get(currentLine.getA());
+			Vector2 toVertex = projected.get(currentLine.getB());
 			if (fromVertex.getX() == fromVertex.getX()
 					&& toVertex.getX() == toVertex.getX()) {
 				sharedLine.setLine(fromVertex.getX(), fromVertex.getY(),
@@ -271,9 +277,9 @@ public class Shape3DrawingComponent extends JComponent {
 	 * @param g
 	 * @param vertices
 	 */
-	private void drawVertices(Graphics2D g, Mesh mesh) {
-		for (int i = 0; i < mesh.getProjected().size(); i++) {
-			Vector2 vertex = mesh.getProjected().get(i);
+	private void drawVertices(Graphics2D g, ArrayList<Vector3> vertices) {
+		for (int i = 0; i < projected.size(); i++) {
+			Vector2 vertex = projected.get(i);
 			if (vertex.getX() == vertex.getX()) {
 				g.drawOval((int) vertex.getX() - 3, (int) vertex.getY() - 3, 6,
 						6);

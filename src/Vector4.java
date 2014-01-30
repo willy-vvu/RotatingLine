@@ -18,6 +18,22 @@ public class Vector4 extends Vector3 {
 	}
 
 	/**
+	 * Creates a Vector4 based on another Vector3.
+	 */
+	public Vector4(Vector4 vector) {
+		this.copy(vector);
+	}
+
+	/**
+	 * Creates a new Vector4 x, y, z, and w set to a given value.
+	 * 
+	 * @param r
+	 */
+	public Vector4(double r) {
+		this.set(r, r, r, r);
+	}
+
+	/**
 	 * Creates a new Vector3 with the given x, y, z, and w
 	 * 
 	 * @param x
@@ -190,7 +206,40 @@ public class Vector4 extends Vector3 {
 	}
 
 	/**
-	 * Use the pythagorean theorem on x, y, z, and w.
+	 * 
+	 * @param vector
+	 * @return the distance to another vector squared
+	 */
+	public double distanceToSquared(Vector4 vector) {
+		return hypotenuseSquared(this.getX() - vector.getX(), this.getY()
+				- vector.getY(), this.getZ() - vector.getZ(), this.w - vector.w);
+	}
+
+	/**
+	 * 
+	 * @param vector
+	 * @return the distance to another vector squared
+	 */
+	public double distanceTo(Vector4 vector) {
+		return Math.sqrt(distanceToSquared(vector));
+	}
+
+	/**
+	 * Use the half the pythagorean theorem on w, x, y, and z.
+	 * 
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @param z
+	 * @return the hypotenuse squared
+	 */
+	public static double hypotenuseSquared(double x, double y, double z,
+			double w) {
+		return x * x + y * y + z * z + w * w;
+	}
+
+	/**
+	 * Use the pythagorean theorem on w, x, y, and z.
 	 * 
 	 * @param x
 	 * @param y
@@ -199,7 +248,7 @@ public class Vector4 extends Vector3 {
 	 * @return the hypotenuse
 	 */
 	public static double hypotenuse(double x, double y, double z, double w) {
-		return Math.sqrt(x * x + y * y + z * z + w * w);
+		return Math.sqrt(hypotenuseSquared(x, y, z, w));
 	}
 
 	/**

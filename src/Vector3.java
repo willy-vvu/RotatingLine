@@ -20,6 +20,22 @@ public class Vector3 extends Vector2 {
 	}
 
 	/**
+	 * Creates a Vector3 based on another Vector3.
+	 */
+	public Vector3(Vector3 vector) {
+		this.copy(vector);
+	}
+
+	/**
+	 * Creates a new Vector3 x, y, and z set to a given value.
+	 * 
+	 * @param r
+	 */
+	public Vector3(double r) {
+		this.set(r, r, r);
+	}
+
+	/**
 	 * Creates a new Vector3 with the given x, y, and z
 	 * 
 	 * @param x
@@ -226,6 +242,38 @@ public class Vector3 extends Vector2 {
 	}
 
 	/**
+	 * 
+	 * @param vector
+	 * @return the distance to another vector squared
+	 */
+	public double distanceToSquared(Vector3 vector) {
+		return hypotenuseSquared(this.getX() - vector.getX(), this.getY()
+				- vector.getY(), this.z
+				- vector.z);
+	}
+
+	/**
+	 * 
+	 * @param vector
+	 * @return the distance to another vector squared
+	 */
+	public double distanceTo(Vector3 vector) {
+		return Math.sqrt(distanceToSquared(vector));
+	}
+
+	/**
+	 * Use the half the pythagorean theorem on x, y, and z.
+	 * 
+	 * @param x
+	 * @param y
+	 * @param z
+	 * @return the hypotenuse squared
+	 */
+	public static double hypotenuseSquared(double x, double y, double z) {
+		return x * x + y * y + z * z;
+	}
+
+	/**
 	 * Use the pythagorean theorem on x, y, and z.
 	 * 
 	 * @param x
@@ -234,7 +282,7 @@ public class Vector3 extends Vector2 {
 	 * @return the hypotenuse
 	 */
 	public static double hypotenuse(double x, double y, double z) {
-		return Math.sqrt(x * x + y * y + z * z);
+		return Math.sqrt(hypotenuseSquared(x, y, z));
 	}
 
 	/**
