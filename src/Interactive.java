@@ -287,6 +287,15 @@ class InteractiveState {
 		selectedShape = shape;
 		speedSlider.setValue((int) (selectedShape.getRotationSpeed() * 100));
 		sidesSlider.setValue(selectedShape.getSides());
+		if(selectedShape.getMode()==0){
+			this.inscribeButton.setEnabled(true);
+			this.inflateButton.setEnabled(false);
+		}
+		else if(selectedShape.getMode()==1){
+			this.inscribeButton.setEnabled(false);
+			this.inflateButton.setEnabled(true);
+		}
+		
 	}
 }
 
