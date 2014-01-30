@@ -65,6 +65,8 @@ public class Interactive {
 		speedSliderPanel.add(speedSliderLabel);
 		JPanel dimensionsPanel = new JPanel();
 		dimensionsPanel.setLayout(new GridLayout(1,2));
+		JPanel shapeOptionsPanel = new JPanel();
+		shapeOptionsPanel.setLayout(new GridLayout(1,2));
 		JPanel sidesSliderPanel = new JPanel();
 		sidesSliderPanel.setLayout(new GridLayout(2,1));
 		JLabel sidesSliderLabel = new JLabel("Number of Sides", JLabel.CENTER);
@@ -84,7 +86,7 @@ public class Interactive {
 			}
 		});
 
-		//overallControls.add(state.speedSlider);
+
 		// creating sidesSlider
 		state.sidesSlider = new JSlider(2, 18, 2);
 		state.sidesSlider.setMajorTickSpacing(1);
@@ -178,6 +180,27 @@ public class Interactive {
 			
 		});
 		
+		state.removeShapeButton = new JButton("Delete Shape");
+		state.removeShapeButton.addMouseListener(new MouseListener(){
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				state.shapes.remove(state.selectedShape);
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {}
+
+			@Override
+			public void mouseExited(MouseEvent e) {}
+
+			@Override
+			public void mousePressed(MouseEvent e) {}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {}
+			
+		});
 		state.threeDButton = new JButton("3D");
 		state.threeDButton.addMouseListener(new MouseListener(){
 
@@ -241,7 +264,9 @@ public class Interactive {
 		overallControls.add(shapeStatePanel);
 		overallControls.add(speedSliderPanel);
 		overallControls.add(sidesSliderPanel);
-		overallControls.add(state.addShapeButton);
+		shapeOptionsPanel.add(state.addShapeButton);
+		shapeOptionsPanel.add(state.removeShapeButton);
+		overallControls.add(shapeOptionsPanel);
 		dimensionsPanel.add(state.threeDButton);
 		dimensionsPanel.add(state.twoDButton);
 		overallControls.add(dimensionsPanel);
@@ -253,7 +278,9 @@ public class Interactive {
 }
 
 class InteractiveState {
+	
 	public JButton addShapeButton=null;
+	public JButton removeShapeButton=null;
 	public boolean mouseDown = false;
 	public boolean rightMouseDown = false;
 	public boolean mouseInFrame = false;
