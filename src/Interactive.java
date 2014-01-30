@@ -63,7 +63,8 @@ public class Interactive {
 		speedSliderPanel.setLayout(new GridLayout(2,1));
 		JLabel speedSliderLabel = new JLabel("Rotation Speed", JLabel.CENTER);
 		speedSliderPanel.add(speedSliderLabel);
-		
+		JPanel dimensionsPanel = new JPanel();
+		dimensionsPanel.setLayout(new GridLayout(1,2));
 		JPanel sidesSliderPanel = new JPanel();
 		sidesSliderPanel.setLayout(new GridLayout(2,1));
 		JLabel sidesSliderLabel = new JLabel("Number of Sides", JLabel.CENTER);
@@ -110,28 +111,16 @@ public class Interactive {
 			}
 
 			@Override
-			public void mouseEntered(MouseEvent e) {
-				
-				
-			}
+			public void mouseEntered(MouseEvent e) {}
 
 			@Override
-			public void mouseExited(MouseEvent e) {
-				
-				
-			}
+			public void mouseExited(MouseEvent e) {}
 
 			@Override
-			public void mousePressed(MouseEvent e) {
-				
-				
-			}
+			public void mousePressed(MouseEvent e) {}
 
 			@Override
-			public void mouseReleased(MouseEvent e) {
-				
-				
-			}
+			public void mouseReleased(MouseEvent e) {}
 			
 		});
 		
@@ -150,28 +139,16 @@ public class Interactive {
 			}
 
 			@Override
-			public void mouseEntered(MouseEvent e) {
-				
-				
-			}
+			public void mouseEntered(MouseEvent e) {}
 
 			@Override
-			public void mouseExited(MouseEvent e) {
-				
-				
-			}
+			public void mouseExited(MouseEvent e) {}
 
 			@Override
-			public void mousePressed(MouseEvent e) {
-				
-				
-			}
+			public void mousePressed(MouseEvent e) {}
 
 			@Override
-			public void mouseReleased(MouseEvent e) {
-				
-				
-			}
+			public void mouseReleased(MouseEvent e) {}
 			
 		});
 		
@@ -188,34 +165,74 @@ public class Interactive {
 			}
 
 			@Override
-			public void mouseEntered(MouseEvent e) {
-				
-				
-			}
+			public void mouseEntered(MouseEvent e) {}
 
 			@Override
-			public void mouseExited(MouseEvent e) {
-				
-			}
+			public void mouseExited(MouseEvent e) {}
 
 			@Override
-			public void mousePressed(MouseEvent e) {
-				
-			}
+			public void mousePressed(MouseEvent e) {}
 
 			@Override
-			public void mouseReleased(MouseEvent e) {
-				
-			}
+			public void mouseReleased(MouseEvent e) {}
 			
 		});
 		
-		//overallControls.repaint();
-		//controls.repaint();
+		state.threeDButton = new JButton("3D");
+		state.threeDButton.addMouseListener(new MouseListener(){
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				state.threeDButton.setEnabled(false);
+				state.twoDButton.setEnabled(true);
+				//TODO Enable three dimensions
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {}
+
+			@Override
+			public void mouseExited(MouseEvent e) {}
+
+			@Override
+			public void mousePressed(MouseEvent e) {}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {}
+			
+		});
+		
+	
+		
+		state.twoDButton = new JButton("2D");
+		
+		state.twoDButton.addMouseListener(new MouseListener(){
+
+			@Override
+			public void mouseClicked(MouseEvent e) {
+				state.threeDButton.setEnabled(true);
+				state.twoDButton.setEnabled(false);
+				//TODO enable 2 dimensions 
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {}
+
+			@Override
+			public void mouseExited(MouseEvent e) {}
+
+			@Override
+			public void mousePressed(MouseEvent e) {}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {}
+			
+		});
+		
+		
 		
 		speedSliderPanel.add(state.speedSlider);
-		//speedSliderPanel.setVisible(true);
-		//sidesSliderPanel.setVisible(true);
+		
 		sidesSliderPanel.add(state.sidesSlider);
 		JPanel shapeStatePanel = new JPanel();
 		shapeStatePanel.setLayout(new GridLayout(1, 2));
@@ -225,10 +242,10 @@ public class Interactive {
 		overallControls.add(speedSliderPanel);
 		overallControls.add(sidesSliderPanel);
 		overallControls.add(state.addShapeButton);
-		//overallControls.setVisible(true);
+		dimensionsPanel.add(state.threeDButton);
+		dimensionsPanel.add(state.twoDButton);
+		overallControls.add(dimensionsPanel);
 		
-		//overallControls.repaint();
-		//controls.repaint();
 		controls.add(overallControls);
 		controls.setVisible(true);
 		state.selectShape(state.shapes.get(0));
@@ -244,7 +261,10 @@ class InteractiveState {
 	public JSlider sidesSlider = null;
 	public JButton inscribeButton = null;
 	public JButton inflateButton = null;
+	public JButton threeDButton = null;
+	public JButton twoDButton = null;
 	public JLabel rotationLabel = null;
+	
 	public int speed = 0;
 	public Shape2 selectedShape = null;
 	public ArrayList<Shape2> shapes = new ArrayList<Shape2>();
