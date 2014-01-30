@@ -33,7 +33,8 @@ public class Interactive {
 	public Interactive() {
 		state = new InteractiveState();
 		// Create frame
-		JFrame frame = new JFrame();
+		//TODO changed to final for 3d
+		final JFrame frame = new JFrame();
 		// Center and size the frame
 		frame.setSize(800, 800);
 		frame.setLocation(10, 10);
@@ -41,23 +42,35 @@ public class Interactive {
 		frame.setTitle("Rotating Line Project");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		// Add the Drawing component
-		ShapeDrawingComponent drawingComponent = new ShapeDrawingComponent(
+		//TODO also changed to final
+		final ShapeDrawingComponent drawingComponent = new ShapeDrawingComponent(
 				state);
+		//TODO also changed to final
+		final Shape3DrawingComponent drawingComponent3D = new Shape3DrawingComponent();
 		frame.add(drawingComponent);
 		// Make it visible
 		frame.setVisible(true);
-		// Make the controls
-		JFrame controls = new JFrame();
+		// Make the controls\
+		//TODO made final
+		final JFrame controls2D = new JFrame();
 		// Set title
-		controls.setTitle("Rotating Line Controls");
+		controls2D.setTitle("2D Rotating Line Controls");
 		// Size and position
-		controls.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		controls.setLocation(850, 10);
-		controls.setSize(350, 800);
+		controls2D.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		controls2D.setLocation(850, 10);
+		controls2D.setSize(350, 800);
+		
+		final JFrame controls3D = new JFrame();
+		// Set title
+		controls3D.setTitle("3D Rotating Line Controls");
+		// Size and position
+		controls3D.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		controls3D.setLocation(850, 10);
+		controls3D.setSize(350, 800);
 		
 
 		// creating overall control panel
-		JPanel overallControls = new JPanel();
+		final JPanel overallControls = new JPanel();
 		overallControls.setLayout(new GridLayout(5, 1));
 		JPanel speedSliderPanel = new JPanel();
 		speedSliderPanel.setLayout(new GridLayout(2,1));
@@ -209,6 +222,13 @@ public class Interactive {
 				state.threeDButton.setEnabled(false);
 				state.twoDButton.setEnabled(true);
 				//TODO Enable three dimensions
+				frame.remove(drawingComponent);
+				frame.add(drawingComponent3D);
+				frame.setVisible(true);
+				frame.repaint();
+				
+				controls2D.setVisible(false);
+				controls3D.setVisible(true);
 			}
 
 			@Override
@@ -236,6 +256,14 @@ public class Interactive {
 				state.threeDButton.setEnabled(true);
 				state.twoDButton.setEnabled(false);
 				//TODO enable 2 dimensions 
+				frame.remove(drawingComponent3D);
+				frame.add(drawingComponent);
+				frame.setVisible(true);
+				frame.repaint();
+				controls3D.setVisible(false);
+				controls2D.setVisible(true);
+				
+				
 			}
 
 			@Override
@@ -271,8 +299,9 @@ public class Interactive {
 		dimensionsPanel.add(state.twoDButton);
 		overallControls.add(dimensionsPanel);
 		
-		controls.add(overallControls);
-		controls.setVisible(true);
+		
+		controls2D.add(overallControls);
+		controls2D.setVisible(true);
 		state.selectShape(state.shapes.get(0));
 	}
 }
@@ -352,20 +381,18 @@ class ShapeDrawingComponent extends JComponent {
 
 			@Override
 			public void mouseDragged(MouseEvent e) {
-				//TODO
 				for (int i = 0; i < state.shapes.size(); i++) {
 					if(state.shapes.get(i) == state.selectedShape){
-						double fudgeFactor = 50;
+						double marginOfError = 50;
 						double x = state.shapes.get(i).getCenter().getX() * containerSize.getX();
 						double y =state.shapes.get(i).getCenter().getY() * containerSize.getY();
-						if ((x <= e.getLocationOnScreen().x + fudgeFactor && x >= e.getLocationOnScreen().x - fudgeFactor)
-									&& (y <= e.getLocationOnScreen().y + fudgeFactor 
-										&& y >= e.getLocationOnScreen().y - fudgeFactor))
+						if ((x <= e.getLocationOnScreen().x + marginOfError && x >= e.getLocationOnScreen().x - marginOfError)
+									&& (y <= e.getLocationOnScreen().y + marginOfError 
+										&& y >= e.getLocationOnScreen().y - marginOfError))
 						{
 							//TODO figure out why you have to adjust when moving the center
 							state.shapes.get(i).setCenter(new Vector2((e.getLocationOnScreen().x -17)/ containerSize.getX(), 
 									(e.getLocationOnScreen().y-42)/containerSize.getY()));
-							//this.repaint();
 						}
 					}
 				}
