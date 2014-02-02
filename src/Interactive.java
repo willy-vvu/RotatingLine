@@ -1,4 +1,5 @@
 import java.awt.BasicStroke;
+import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -46,7 +47,7 @@ public class Interactive {
 		final ShapeDrawingComponent drawingComponent = new ShapeDrawingComponent(
 				state);
 		//TODO also changed to final
-		final Shape3DrawingComponent drawingComponent3D = new Shape3DrawingComponent();
+		//final Shape3DrawingComponent drawingComponent3D = new Shape3DrawingComponent();
 		frame.add(drawingComponent);
 		// Make it visible
 		frame.setVisible(true);
@@ -121,7 +122,7 @@ public class Interactive {
 			public void mouseClicked(MouseEvent e) {
 				state.inscribeButton.setEnabled(false);
 				state.inflateButton.setEnabled(true);
-				state.selectedShape.setMode(1);
+				state.selectedShape.setMode((byte) 1);
 				
 			}
 
@@ -149,7 +150,7 @@ public class Interactive {
 			public void mouseClicked(MouseEvent e) {
 				state.inscribeButton.setEnabled(true);
 				state.inflateButton.setEnabled(false);
-				state.selectedShape.setMode(0);
+				state.selectedShape.setMode((byte) 0);
 				
 			}
 
@@ -172,7 +173,7 @@ public class Interactive {
 
 			@Override
 			public void mouseClicked(MouseEvent e) {
-				Shape2 shape = new Shape2(2);
+				Shape3 shape = new Shape3(2);
 				shape.getCenter().set(0.5, 0.5);
 				state.shapes.add(shape);
 				state.selectShape(shape);
@@ -223,7 +224,7 @@ public class Interactive {
 				state.twoDButton.setEnabled(true);
 				//TODO Enable three dimensions
 				frame.remove(drawingComponent);
-				frame.add(drawingComponent3D);
+				//frame.add(drawingComponent3D);
 				frame.setVisible(true);
 				frame.repaint();
 				
@@ -256,7 +257,7 @@ public class Interactive {
 				state.threeDButton.setEnabled(true);
 				state.twoDButton.setEnabled(false);
 				//TODO enable 2 dimensions 
-				frame.remove(drawingComponent3D);
+				//frame.remove(drawingComponent3D);
 				frame.add(drawingComponent);
 				frame.setVisible(true);
 				frame.repaint();
@@ -282,6 +283,7 @@ public class Interactive {
 		
 		
 		
+		
 		speedSliderPanel.add(state.speedSlider);
 		
 		sidesSliderPanel.add(state.sidesSlider);
@@ -303,6 +305,8 @@ public class Interactive {
 		controls2D.add(overallControls);
 		controls2D.setVisible(true);
 		state.selectShape(state.shapes.get(0));
+		
+		
 	}
 }
 
@@ -322,8 +326,8 @@ class InteractiveState {
 	public JLabel rotationLabel = null;
 	
 	public int speed = 0;
-	public Shape2 selectedShape = null;
-	public ArrayList<Shape2> shapes = new ArrayList<Shape2>();
+	public Shape3 selectedShape = null;
+	public ArrayList<Shape3> shapes = new ArrayList<Shape3>();
 
 	public void setSpeed(int speed) {
 		if (selectedShape != null) {
@@ -339,7 +343,7 @@ class InteractiveState {
 		}
 	}
 
-	public void selectShape(Shape2 shape) {
+	public void selectShape(Shape3 shape) {
 		selectedShape = shape;
 		speedSlider.setValue((int) (selectedShape.getRotationSpeed() * 100));
 		sidesSlider.setValue(selectedShape.getSides());
@@ -358,7 +362,7 @@ class InteractiveState {
 class ShapeDrawingComponent extends JComponent {
 	private static final long serialVersionUID = 1L;
 
-	private Vector2 containerSize = new Vector2();
+	private Vector3 containerSize = new Vector3();
 	private static final Color backgroundColor = new Color(255, 255, 255, 0);
 	private static final Color foregroundColor = new Color(0x000000);
 	private static final Color selectedColor = new Color(0,0,255);
@@ -368,15 +372,17 @@ class ShapeDrawingComponent extends JComponent {
 	private static Ellipse2D.Double center = new Ellipse2D.Double();
 	private long lastTick = 0;
 	private InteractiveState state;
+	//TODO figure out what this does
+	private Projector projector = new Projector(45);
 
 	public ShapeDrawingComponent(final InteractiveState state) {
 		this.state = state;
-		state.shapes
-				.add(new Shape2(5, new Vector2(0.5, 0.5), 1, Shape2.INFLATE));
-		state.shapes.add(new Shape2(3, new Vector2(0.2, 0.5), -0.4,
-				Shape2.INSCRIBE));
-		state.shapes.add(new Shape2(2, new Vector2(0.5, 0.3), .3,
-				Shape2.INFLATE));
+		state.shapes.add(new Shape3(3));
+				//.add(new Shape3(5, new Vector2(0.5, 0.5), 1, (int)(Shape3.INFLATE)));
+		state.shapes.add(new Shape3(5));
+				//.add(new Shape3(3, new Vector2(0.2, 0.5), -0.4, Shape3.INSCRIBE));
+		state.shapes.add(new Shape3(7));
+				//new Shape3(2, new Vector2(0.5, 0.3), .3,Shape3.INFLATE));
 		this.addMouseMotionListener(new MouseMotionListener() {
 
 			@Override
@@ -391,8 +397,8 @@ class ShapeDrawingComponent extends JComponent {
 										&& y >= e.getLocationOnScreen().y - marginOfError))
 						{
 							//TODO figure out why you have to adjust when moving the center
-							state.shapes.get(i).setCenter(new Vector2((e.getLocationOnScreen().x -17)/ containerSize.getX(), 
-									(e.getLocationOnScreen().y-42)/containerSize.getY()));
+							state.shapes.get(i).setCenter(new Vector3((e.getLocationOnScreen().x -17)/ containerSize.getX(), 
+									(e.getLocationOnScreen().y-42)/containerSize.getY(),0));
 						}
 					}
 				}
@@ -464,11 +470,11 @@ class ShapeDrawingComponent extends JComponent {
 		lastTick = currentTime;
 		// Compute, draw and advance all shapes
 		for (int i = 0; i < state.shapes.size(); i++) {
-			Shape2 currentShape = state.shapes.get(i);
+			Shape3 currentShape = state.shapes.get(i);
 
 			// lets the shape know how big the window is
 			currentShape.setContainerSize(containerSize);
-			currentShape.transform();
+			currentShape.transform(projector);
 			this.drawShape(g, currentShape);
 			currentShape.step(timeElapsed);
 		}
@@ -483,7 +489,7 @@ class ShapeDrawingComponent extends JComponent {
 	 * @param g
 	 * @param shape
 	 */
-	private void drawShape(Graphics2D g, Shape2 shape) {
+	private void drawShape(Graphics2D g, Shape3 shape) {
 		if(state.selectedShape== shape){
 			g.setColor(selectedColor);
 			g.setStroke(thickLine);
@@ -496,7 +502,7 @@ class ShapeDrawingComponent extends JComponent {
 			center.setFrame(shape.getCenter().getX() * this.containerSize.getX() -2.5 , shape.getCenter().getY() * this.containerSize.getY() -2.5 , 5, 5);
 			g.draw(center);
 		}
-		ArrayList<Vector2> vertices = shape.getVertices();
+		ArrayList<Vector3> vertices = shape.getVertices();
 		for (int i = 0; i < vertices.size(); i++) {
 			Vector2 fromVertex = vertices.get(i);
 			Vector2 toVertex = vertices.get((i + 1) % vertices.size());
