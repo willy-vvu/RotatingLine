@@ -26,12 +26,13 @@ public class Shape3 extends Mesh {
 	private static final Quaternion tempQ = new Quaternion();
 	private static final Vector3 tempV3 = new Vector3();
 	private byte mode = Shape3.INFLATE;
-	private int A = 0, B = 0, C = 0, D = 0;
+	private int A = 55, B = 71, C = 0, D = 90;
 	public static final int TETRAHEDRON = -3;
 	public static final int HEXAHEDRON = -6;
 	public static final int OCTAHEDRON = -8;
 	public static final int ICOSAHEDRON = -12;
-	private int sides = 0;
+	private int sides = 2;
+	private boolean is2D = true;
 	public static final byte INFLATE = 0;
 	public static final byte INSCRIBE = 1;
 	// Note that the center is between 0 and 1, relative to the container size.
@@ -50,7 +51,7 @@ public class Shape3 extends Mesh {
 	 * @param sides
 	 */
 	public Shape3(int sides) {
-		if (sides > 0) {
+		if (is2D) {
 			this.setSides(sides);
 		} else {
 			this.setPreset(sides);
@@ -78,13 +79,45 @@ public class Shape3 extends Mesh {
 	}
 
 	/**
+	 * Determines if the current shape is a certain preset.
+	 * 
+	 * @param preset
+	 * @return
+	 */
+	public boolean isPreset(int preset) {
+		if (preset == Shape3.TETRAHEDRON) {
+			return this.hasValues(0, 120, 0, 120);
+		} else if (preset == Shape3.HEXAHEDRON) {
+			return this.hasValues(55, 71, 0, 90);
+		} else if (preset == Shape3.OCTAHEDRON) {
+			return this.hasValues(0, 90, 0, 90);
+		} else if (preset == Shape3.ICOSAHEDRON) {
+			return this.hasValues(0, 60, 36, 72);
+		}
+		return false;
+	}
+
+	/**
+	 * Determines if the current A, B, C, and D match the given ones.
+	 * 
+	 * @param A
+	 * @param B
+	 * @param C
+	 * @param D
+	 * @return
+	 */
+	public boolean hasValues(int A, int B, int C, int D) {
+		return this.A == A && this.B == B && this.C == C && this.D == D;
+	}
+
+	/**
 	 * Create a new shape from a given preset and rotation speed.
 	 * 
 	 * @param sides
 	 * @param rotationSpeed
 	 */
 	public Shape3(int sides, double rotationSpeed) {
-		if (sides > 0) {
+		if (is2D) {
 			this.setSides(sides);
 		} else {
 			this.setPreset(sides);
@@ -126,7 +159,7 @@ public class Shape3 extends Mesh {
 	 */
 	private Shape3 compute() {
 		int numVertices = 0;
-		if (getSides() > 0) {
+		if (is2D) {
 			numVertices = getSides();
 		} else {
 			// Calculate the number of vertices to resize the ArrayLists
@@ -150,10 +183,22 @@ public class Shape3 extends Mesh {
 		while (computed.size() > numVertices) {
 			computed.remove(0);
 		}
-		if (getSides() > 0) {
+		if (is2D) {
 			compute2D();
 		} else {
 			compute3D();
+			// "Hack" for cubes
+			if (this.isPreset(HEXAHEDRON)) {
+				double r = Math.sqrt(3) / 3;
+				computed.get(0).set(r, r, r);
+				computed.get(1).set(-r, r, r);
+				computed.get(2).set(-r, r, -r);
+				computed.get(3).set(r, r, -r);
+				computed.get(4).set(r, -r, r);
+				computed.get(5).set(-r, -r, r);
+				computed.get(6).set(-r, -r, -r);
+				computed.get(7).set(r, -r, -r);
+			}
 		}
 		return this;
 	}
@@ -547,4 +592,18 @@ public class Shape3 extends Mesh {
 		this.needsRecomputation = true;
 	}
 
+	/**
+	 * Sets the shape as 2D or 3D
+	 */
+	public void set2D(boolean is2D) {
+		this.is2D = is2D;
+		this.needsRecomputation = true;
+	}
+
+	/**
+	 * @return the is2D
+	 */
+	public boolean isIs2D() {
+		return is2D;
+	}
 }

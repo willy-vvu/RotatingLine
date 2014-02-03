@@ -12,6 +12,7 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Hashtable;
 
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -19,6 +20,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSlider;
+import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -59,7 +61,7 @@ public class Interactive {
 
 		// creating overall control panel
 		final JPanel overallControls = new JPanel();
-		overallControls.setLayout(new GridLayout(5, 1));
+		overallControls.setLayout(new GridLayout(7, 1));
 		JPanel speedSliderPanel = new JPanel();
 		speedSliderPanel.setLayout(new GridLayout(2, 1));
 		JLabel speedSliderLabel = new JLabel("Rotation Speed", JLabel.CENTER);
@@ -68,10 +70,23 @@ public class Interactive {
 		dimensionsPanel.setLayout(new GridLayout(1, 2));
 		JPanel shapeOptionsPanel = new JPanel();
 		shapeOptionsPanel.setLayout(new GridLayout(1, 2));
+
 		JPanel sidesSliderPanel = new JPanel();
 		sidesSliderPanel.setLayout(new GridLayout(2, 1));
 		JLabel sidesSliderLabel = new JLabel("Number of Sides", JLabel.CENTER);
 		sidesSliderPanel.add(sidesSliderLabel);
+		JPanel facesSliderPanel = new JPanel();
+		facesSliderPanel.setLayout(new GridLayout(2, 1));
+		JLabel facesSliderLabel = new JLabel("Number of Faces", JLabel.CENTER);
+		facesSliderPanel.add(facesSliderLabel);
+		state.shapePanel = new JTabbedPane();
+		state.shapePanel.addChangeListener(new ChangeListener() {
+
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				state.set2D(state.shapePanel.getSelectedIndex() == 0);
+			}
+		});
 
 		// creating panel for the buttons
 		state.speedSlider = new JSlider(-600, 600, 0);
@@ -87,17 +102,38 @@ public class Interactive {
 			}
 		});
 
-		// creating sidesSlider
-		state.sidesSlider = new JSlider(2, 18, 2);
-		state.sidesSlider.setMajorTickSpacing(1);
-		state.sidesSlider.setMinorTickSpacing(1);
-		state.sidesSlider.setPaintTicks(true);
-		// state.sidesSlider.setVisible(true);
-		state.sidesSlider.addChangeListener(new ChangeListener() {
+		// creating sideSlider
+		state.sideSlider = new JSlider(2, 18, 2);
+		state.sideSlider.setMajorTickSpacing(1);
+		state.sideSlider.setMinorTickSpacing(1);
+		state.sideSlider.setPaintTicks(true);
+		state.sideSlider.setPaintLabels(true);
+		state.sideSlider.addChangeListener(new ChangeListener() {
 
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				state.setSides(state.sidesSlider.getValue());
+				state.setSides(state.sideSlider.getValue());
+			}
+		});
+		// creating faceSlider
+		state.faceSlider = new JSlider(1, 4, 2);
+		state.faceSlider.setMajorTickSpacing(1);
+		state.faceSlider.setMinorTickSpacing(1);
+		state.faceSlider.setPaintTicks(true);
+		Hashtable<Integer, JLabel> faceLabels = new Hashtable<Integer, JLabel>();
+		faceLabels.put(1, new JLabel("Tetrahedron"));
+		faceLabels.put(2, new JLabel("Hexahedron"));
+		faceLabels.put(3, new JLabel("Octahedron"));
+		faceLabels.put(4, new JLabel("Icosahedron"));
+		state.faceSlider.setLabelTable(faceLabels);
+		state.faceSlider.setPaintLabels(true);
+
+		// state.facesSlider.setVisible(true);
+		state.faceSlider.addChangeListener(new ChangeListener() {
+
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				state.setPreset(state.faceSlider.getValue());
 			}
 		});
 
@@ -279,15 +315,17 @@ public class Interactive {
 		});
 
 		speedSliderPanel.add(state.speedSlider);
-
-		sidesSliderPanel.add(state.sidesSlider);
+		sidesSliderPanel.add(state.sideSlider);
+		facesSliderPanel.add(state.faceSlider);
 		JPanel shapeStatePanel = new JPanel();
 		shapeStatePanel.setLayout(new GridLayout(1, 2));
 		shapeStatePanel.add(state.inscribeButton);
 		shapeStatePanel.add(state.inflateButton);
 		overallControls.add(shapeStatePanel);
 		overallControls.add(speedSliderPanel);
-		overallControls.add(sidesSliderPanel);
+		state.shapePanel.addTab("2D shape", sidesSliderPanel);
+		state.shapePanel.addTab("3D polyhedron", facesSliderPanel);
+		overallControls.add(state.shapePanel);
 		shapeOptionsPanel.add(state.addShapeButton);
 		shapeOptionsPanel.add(state.removeShapeButton);
 		overallControls.add(shapeOptionsPanel);
@@ -310,12 +348,14 @@ class InteractiveState {
 	public boolean rightMouseDown = false;
 	public boolean mouseInFrame = false;
 	public JSlider speedSlider = null;
-	public JSlider sidesSlider = null;
+	public JSlider sideSlider = null;
+	public JSlider faceSlider = null;
 	public JButton inscribeButton = null;
 	public JButton inflateButton = null;
 	public JButton threeDButton = null;
 	public JButton twoDButton = null;
 	public JLabel rotationLabel = null;
+	public JTabbedPane shapePanel = null;
 	public boolean threeDimensions = false;
 	public double blendDimensions = 0;
 	public Vector3 view = new Vector3(0.001, 0.001, -500);
@@ -341,6 +381,41 @@ class InteractiveState {
 		}
 	}
 
+	/**
+	 * Sets whether or not the shape is 2D or 3D
+	 * 
+	 * @param b
+	 */
+	public void set2D(boolean is2D) {
+		if (selectedShape != null) {
+			selectedShape.set2D(is2D);
+		}
+	}
+
+	/**
+	 * Sets the selected shape's preset.
+	 * 
+	 * @param value
+	 */
+	public void setPreset(int value) {
+		if (selectedShape != null) {
+			switch (value) {
+			case 1:
+				selectedShape.setPreset(Shape3.TETRAHEDRON);
+				break;
+			case 2:
+				selectedShape.setPreset(Shape3.HEXAHEDRON);
+				break;
+			case 3:
+				selectedShape.setPreset(Shape3.OCTAHEDRON);
+				break;
+			case 4:
+				selectedShape.setPreset(Shape3.ICOSAHEDRON);
+				break;
+			}
+		}
+	}
+
 	public void setSides(int value) {
 		if (selectedShape != null) {
 			selectedShape.setSides(Math.max(Math.min(value, 18), 2));
@@ -350,14 +425,24 @@ class InteractiveState {
 	public void selectShape(Shape3 shape) {
 		selectedShape = shape;
 		speedSlider.setValue((int) (selectedShape.getRotationSpeed() * 100));
-		sidesSlider.setValue(selectedShape.getSides());
-		if (selectedShape.getMode() == 0) {
+		sideSlider.setValue(selectedShape.getSides());
+		if (selectedShape.isPreset(Shape3.TETRAHEDRON)) {
+			faceSlider.setValue(1);
+		} else if (selectedShape.isPreset(Shape3.HEXAHEDRON)) {
+			faceSlider.setValue(2);
+		} else if (selectedShape.isPreset(Shape3.OCTAHEDRON)) {
+			faceSlider.setValue(3);
+		} else if (selectedShape.isPreset(Shape3.ICOSAHEDRON)) {
+			faceSlider.setValue(4);
+		}
+		if (selectedShape.getMode() == Shape3.INFLATE) {
 			this.inscribeButton.setEnabled(true);
 			this.inflateButton.setEnabled(false);
 		} else if (selectedShape.getMode() == 1) {
 			this.inscribeButton.setEnabled(false);
 			this.inflateButton.setEnabled(true);
 		}
+		shapePanel.setSelectedIndex(selectedShape.isIs2D() ? 0 : 1);
 
 	}
 }
@@ -515,9 +600,8 @@ class ShapeDrawingComponent extends JComponent {
 				state.view.add(tempV3);
 			}
 			// Animate the zoom
-			state.view.setZ(state.view.getZ()
-					* (1 - state.blendDimensions) + state.viewZoom
-					* state.blendDimensions);
+			state.view.setZ(state.view.getZ() * (1 - state.blendDimensions)
+					+ state.viewZoom * state.blendDimensions);
 			state.viewVelocity.multiplyScalar(0.999);
 		} else {
 			// Spin consistently

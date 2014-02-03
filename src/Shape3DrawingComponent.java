@@ -7,7 +7,6 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.Line2D;
-import java.lang.Thread.State;
 import java.util.ArrayList;
 import java.util.Date;
 
