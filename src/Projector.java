@@ -68,6 +68,10 @@ public class Projector {
 
 	/**
 	 * Projects an ArrayList of 3D points onto an ArrayList of 2D points.
+	 * 
+	 * @param source
+	 * @param destination
+	 * @return the destination array
 	 */
 	public ArrayList<Vector2> project(ArrayList<Vector3> source,
 			ArrayList<Vector2> destination) {
@@ -78,20 +82,30 @@ public class Projector {
 		while (destination.size() > source.size()) {
 			destination.remove(0);
 		}
+		for (int i = 0; i < source.size(); i++) {
+			project(source.get(i), destination.get(i));
+		}
+		return destination;
+	}
+
+	/**
+	 * Projects a single Vector3 onto a Vector2
+	 * 
+	 * @param source
+	 * @param destination
+	 * @return the destination vector
+	 */
+	public Vector2 project(Vector3 source, Vector2 destination) {
 		if (needsRecomputation) {
 			compute();
 		}
-		for (int i = 0; i < source.size(); i++) {
-			tempVector3.copy(source.get(i)).subtract(position)
-					.rotate(rotationQuaternion);
-			if (tempVector3.getZ() > 0) {
-				destination.get(i).copy(tempVector3)
-						.divideScalar(tempVector3.getZ())
-						.multiplyScalar(ez * halfScreenSize.getY())
-						.add(halfScreenSize);
-			} else {
-				destination.get(i).set(Double.NaN, Double.NaN);
-			}
+		tempVector3.copy(source).subtract(position).rotate(rotationQuaternion);
+		if (tempVector3.getZ() > 0) {
+			destination.copy(tempVector3).divideScalar(tempVector3.getZ())
+					.multiplyScalar(ez * halfScreenSize.getY())
+					.add(halfScreenSize);
+		} else {
+			destination.set(Double.NaN, Double.NaN);
 		}
 		return destination;
 	}

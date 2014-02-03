@@ -36,22 +36,7 @@ public class Shape3 extends Mesh {
 	public static final byte INSCRIBE = 1;
 	// Note that the center is between 0 and 1, relative to the container size.
 	private Vector3 center = new Vector3(0.5);
-	private Vector3 containerSize = null;
 	private boolean needsRecomputation = true;
-
-	/**
-	 * Tests out the Shape2 class and its methods.
-	 * 
-	 * @param args
-	 */
-	public static void main(String[] args) {
-		Shape3 s = new Shape3(Shape3.HEXAHEDRON);
-		s.setCenter(new Vector3(0.5));
-		s.setContainerSize(new Vector3(100));
-		s.inscribe();
-		System.out.println(s.computed);
-		System.out.println(s.getLines());
-	}
 
 	/**
 	 * Creates a new shape.
@@ -280,22 +265,24 @@ public class Shape3 extends Mesh {
 	}
 
 	/**
-	 * Transforms (inflates or inscribes) the shape based on its mode, then
-	 * projects it given a projector.
+	 * Transforms (inflates or inscribes) the shape in a given container based
+	 * on its mode, then projects it given a projector.
 	 * 
+	 * @param projector
+	 * @param containerSize
 	 * @return itself
 	 */
-	public Shape3 transform(Projector projector) {
+	public Shape3 transform(Projector projector, Vector3 containerSize) {
 		if (this.needsRecomputation) {
 			this.compute();
 		}
 		this.rotate();
 		if (this.mode == Shape3.INFLATE) {
-			this.inflate();
+			this.inflate(containerSize);
 		} else if (this.mode == Shape3.INSCRIBE) {
-			this.inscribe();
+			this.inscribe(containerSize);
 		}
-		this.center();
+		this.center(containerSize);
 		this.project(projector);
 		return this;
 	}
@@ -304,12 +291,14 @@ public class Shape3 extends Mesh {
 	 * Moves each vertex to the edge of the shape container based on the
 	 * respective calculated distance to the edge of each vertex.
 	 * 
+	 * @param containerSize
 	 * @return itself
 	 */
-	protected Shape3 inflate() {
+	protected Shape3 inflate(Vector3 containerSize) {
 		for (int i = 0; i < getVertices().size(); i++) {
 			Vector3 currentVertex = this.getVertices().get(i);
-			currentVertex.multiplyScalar(this.getToSide(currentVertex));
+			currentVertex.multiplyScalar(this.getToSide(currentVertex,
+					containerSize));
 		}
 		return this;
 	}
@@ -319,14 +308,15 @@ public class Shape3 extends Mesh {
 	 * from any vertex to the edge and setting the radius of the polygon
 	 * accordingly.
 	 * 
+	 * @param containerSize
 	 * @return itself
 	 */
-	protected Shape3 inscribe() {
+	protected Shape3 inscribe(Vector3 containerSize) {
 		// Find the minimum distance to a wall from any vertex
 		double minimumRadius = Double.POSITIVE_INFINITY;
 		for (int i = 0; i < getVertices().size(); i++) {
 			minimumRadius = Math.min(minimumRadius,
-					this.getToSide(this.getVertices().get(i)));
+					this.getToSide(this.getVertices().get(i), containerSize));
 		}
 		// Set the radius of the polygon to that minimum distance
 		for (int i = 0; i < getVertices().size(); i++) {
@@ -336,12 +326,13 @@ public class Shape3 extends Mesh {
 	}
 
 	/**
-	 * Centers the shape in its bounding box.
+	 * Centers the shape in a container.
 	 * 
+	 * @param containerSize
 	 * @return itself
 	 */
-	private Shape3 center() {
-		tempV3.set(-0.5, -0.5, -0.5).add(this.center).multiply(containerSize);
+	private Shape3 center(Vector3 containerSize) {
+		tempV3.set(-0.5).add(this.center).multiply(containerSize);
 		for (int i = 0; i < getVertices().size(); i++) {
 			getVertices().get(i).add(tempV3);
 		}
@@ -352,15 +343,16 @@ public class Shape3 extends Mesh {
 	 * Gets the distance from a vector to a side of the container.
 	 * 
 	 * @param vector
+	 * @param containerSize
 	 * @return
 	 */
-	public double getToSide(Vector3 vector) {
+	public double getToSide(Vector3 vector, Vector3 containerSize) {
 		double distanceToXPoint = Double.POSITIVE_INFINITY, distanceToYPoint = Double.POSITIVE_INFINITY, distanceToZPoint = Double.POSITIVE_INFINITY;
 		if (vector.getX() != 0) {
 			// Find the x distance to the left or right wall.
-			double distanceToX = vector.getX() > 0 ? this.containerSize.getX()
+			double distanceToX = vector.getX() > 0 ? containerSize.getX()
 					* (1 - this.center.getX()) : this.center.getX()
-					* this.containerSize.getX();
+					* containerSize.getX();
 			// Find the total distance to projected point on the left or right
 			// wall.
 
@@ -369,8 +361,8 @@ public class Shape3 extends Mesh {
 		if (vector.getY() != 0) {
 			// Find the y distance to the ceiling or floor.
 			double distanceToY = vector.getY() > 0 ? (1 - this.center.getY())
-					* this.containerSize.getY() : this.center.getY()
-					* this.containerSize.getY();
+					* containerSize.getY() : this.center.getY()
+					* containerSize.getY();
 			// Find the total distance to projected point on the ceiling or
 			// floor.
 			distanceToYPoint = distanceToY / Math.abs(vector.getY());
@@ -378,8 +370,8 @@ public class Shape3 extends Mesh {
 		if (vector.getZ() != 0) {
 			// Find the z distance to the front or back.
 			double distanceToZ = vector.getZ() > 0 ? (1 - this.center.getZ())
-					* this.containerSize.getZ() : this.center.getZ()
-					* this.containerSize.getZ();
+					* containerSize.getZ() : this.center.getZ()
+					* containerSize.getZ();
 			// Find the total distance to projected point on the front or back
 			// wall.
 			distanceToZPoint = distanceToZ / Math.abs(vector.getZ());
@@ -451,21 +443,6 @@ public class Shape3 extends Mesh {
 	 */
 	public void setCenter(Vector3 center) {
 		this.center = center;
-	}
-
-	/**
-	 * @return the containerSize
-	 */
-	public Vector3 getContainerSize() {
-		return containerSize;
-	}
-
-	/**
-	 * @param containerSize
-	 *            the containerSize to set
-	 */
-	public void setContainerSize(Vector3 containerSize) {
-		this.containerSize = containerSize;
 	}
 
 	/**

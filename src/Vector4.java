@@ -30,7 +30,7 @@ public class Vector4 extends Vector3 {
 	 * @param r
 	 */
 	public Vector4(double r) {
-		this.set(r, r, r, r);
+		this.set(r);
 	}
 
 	/**
@@ -43,6 +43,18 @@ public class Vector4 extends Vector3 {
 	 */
 	public Vector4(double x, double y, double z, double w) {
 		this.set(x, y, z, w);
+	}
+
+	/**
+	 * Sets the w, x, y, and z to the same value
+	 * 
+	 * @param r
+	 * @return itself
+	 */
+	public Vector3 set(double r) {
+		super.set(r);
+		this.w = r;
+		return this;
 	}
 
 	/**

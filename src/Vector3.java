@@ -10,6 +10,7 @@
  */
 public class Vector3 extends Vector2 {
 	private double z = 0;
+	private static final Vector3 tempV3 = new Vector3();
 	private static final Quaternion tempQ = new Quaternion();
 	private static final Quaternion tempQ_2 = new Quaternion();
 
@@ -32,7 +33,7 @@ public class Vector3 extends Vector2 {
 	 * @param r
 	 */
 	public Vector3(double r) {
-		this.set(r, r, r);
+		this.set(r);
 	}
 
 	/**
@@ -44,6 +45,18 @@ public class Vector3 extends Vector2 {
 	 */
 	public Vector3(double x, double y, double z) {
 		this.set(x, y, z);
+	}
+
+	/**
+	 * Sets the x, y, and z to the same value
+	 * 
+	 * @param r
+	 * @return itself
+	 */
+	public Vector3 set(double r) {
+		super.set(r);
+		this.z = r;
+		return this;
 	}
 
 	/**
@@ -161,6 +174,20 @@ public class Vector3 extends Vector2 {
 	}
 
 	/**
+	 * Linearly interpolates from the current vector to a target vector given a
+	 * ratio
+	 * 
+	 * @param vector
+	 * @param ratio
+	 * @return itself
+	 */
+	public Vector3 lerp(Vector3 vector, double ratio) {
+		tempV3.copy(vector).multiplyScalar(ratio);
+		this.multiplyScalar(1 - ratio).add(tempV3);
+		return this;
+	}
+
+	/**
 	 * Inverses the current Vector3.
 	 * 
 	 * @return itself
@@ -248,8 +275,7 @@ public class Vector3 extends Vector2 {
 	 */
 	public double distanceToSquared(Vector3 vector) {
 		return hypotenuseSquared(this.getX() - vector.getX(), this.getY()
-				- vector.getY(), this.z
-				- vector.z);
+				- vector.getY(), this.z - vector.z);
 	}
 
 	/**

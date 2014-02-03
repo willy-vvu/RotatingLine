@@ -3,7 +3,8 @@ import java.util.ArrayList;
 /**
  * Mesh.java
  * 
- * A class that holds an ArrayList of vertices and an ArrayList of lines.
+ * A class that holds an ArrayList of vertices and an ArrayList of lines that
+ * constitute a 3D mesh.
  * 
  * Also temporarily holds its own projected points.
  * 
@@ -49,10 +50,8 @@ public class Mesh {
 			// minDistSquared = Math.min(minDistSquared,
 			// tempV2.subtract(tempV2_2)
 			// .lengthSquared());
-			minDist = Math.min(
-					minDist,
-					pointA.distanceTo(point)
-							+ pointB.distanceTo(point)
+			minDist = Math.min(minDist,
+					pointA.distanceTo(point) + pointB.distanceTo(point)
 							- pointA.distanceTo(pointB));
 		}
 		return Math.sqrt(minDist);
@@ -62,15 +61,29 @@ public class Mesh {
 	 * Creates a mesh based on a given geometry builder.
 	 */
 	public Mesh(Geometry geometry) {
+		buildFrom(geometry);
+	}
+
+	/**
+	 * Builds the mesh based on an existing geometry.
+	 * 
+	 * @param geometry
+	 * @return itself
+	 */
+	public Mesh buildFrom(Geometry geometry) {
 		vertices = geometry.getVertices();
 		lines = geometry.getLines();
+		return this;
 	}
 
 	/**
 	 * Projects the vertices of the Mesh onto 2D.
+	 * 
+	 * @return itself
 	 */
-	public void project(Projector projector) {
+	public Mesh project(Projector projector) {
 		projector.project(vertices, projected);
+		return this;
 	}
 
 	/**

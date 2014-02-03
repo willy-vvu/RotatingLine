@@ -1,7 +1,7 @@
 /**
  * CubeGeometry.java
  * 
- * A geometry defining a cube
+ * A geometry defining a cube.
  * 
  * Written Jan 30, 2014.
  * 

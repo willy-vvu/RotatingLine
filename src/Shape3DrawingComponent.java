@@ -7,16 +7,12 @@ import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.geom.Line2D;
+import java.lang.Thread.State;
 import java.util.ArrayList;
 import java.util.Date;
 
 import javax.swing.JComponent;
 import javax.swing.JFrame;
-
-import jssc.SerialPort;
-import jssc.SerialPortEvent;
-import jssc.SerialPortEventListener;
-import jssc.SerialPortException;
 
 /**
  * Shape3DrawingComponent.java
@@ -29,7 +25,6 @@ import jssc.SerialPortException;
  * 
  */
 public class Shape3DrawingComponent extends JComponent {
-	static SerialPort serialPort;
 
 	/**
 	 * @param args
@@ -169,30 +164,6 @@ public class Shape3DrawingComponent extends JComponent {
 						-10));
 			}
 		});
-		serialPort = new SerialPort("COM3");
-		try {
-			serialPort.openPort();// Open port
-			serialPort.setParams(9600, 8, 1, 0);// Set params
-			int mask = SerialPort.MASK_RXCHAR;// Prepare mask
-			serialPort.setEventsMask(mask);// Set mask
-			serialPort.addEventListener(new SerialPortEventListener() {
-				@Override
-				public void serialEvent(SerialPortEvent event) {
-					if (event.isRXCHAR()) {// If data is available
-						try {
-							byte[] in = serialPort.readBytes(1);
-							double amount = -0.001 * (in[0]);
-							viewVelocity.setX(viewVelocity.getX() * amount < 0 ? amount
-									: viewVelocity.getX() + amount);
-						} catch (Exception e) {
-							System.out.println(e);
-						}
-					}
-				}
-			});
-		} catch (SerialPortException ex) {
-			System.out.println(ex);
-		}
 
 	}
 
@@ -232,8 +203,7 @@ public class Shape3DrawingComponent extends JComponent {
 		// Compute, draw and advance all shapes
 		for (int i = 0; i < shapes.size(); i++) {
 			Shape3 currentShape = shapes.get(i);
-			currentShape.setContainerSize(boxSize);
-			currentShape.transform(projector);
+			currentShape.transform(projector,boxSize);
 			this.drawLines(g, currentShape);
 			this.drawVertices(g, currentShape);
 			currentShape.step(timeElapsed);

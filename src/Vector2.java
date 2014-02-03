@@ -11,6 +11,7 @@
 public class Vector2 {
 	private double x = 0;
 	private double y = 0;
+	private static final Vector2 tempV2 = new Vector2();
 
 	/**
 	 * Creates a new, default Vector2, with the value (0,0)
@@ -31,7 +32,7 @@ public class Vector2 {
 	 * @param r
 	 */
 	public Vector2(double r) {
-		this.set(r, r);
+		this.set(r);
 	}
 
 	/**
@@ -42,6 +43,18 @@ public class Vector2 {
 	 */
 	public Vector2(double x, double y) {
 		this.set(x, y);
+	}
+
+	/**
+	 * Sets the x and y to the same value
+	 * 
+	 * @param r
+	 * @return itself
+	 */
+	public Vector2 set(double r) {
+		this.x = r;
+		this.y = r;
+		return this;
 	}
 
 	/**
@@ -146,6 +159,20 @@ public class Vector2 {
 		double tempX = x, tempY = y;
 		this.x = tempX * Math.cos(angle) - tempY * Math.sin(angle);
 		this.y = tempX * Math.sin(angle) + tempY * Math.cos(angle);
+		return this;
+	}
+
+	/**
+	 * Linearly interpolates from the current vector to a target vector given a
+	 * ratio
+	 * 
+	 * @param vector
+	 * @param ratio
+	 * @return itself
+	 */
+	public Vector2 lerp(Vector2 vector, double ratio) {
+		tempV2.copy(vector).multiplyScalar(ratio);
+		this.multiplyScalar(1 - ratio).add(tempV2);
 		return this;
 	}
 
