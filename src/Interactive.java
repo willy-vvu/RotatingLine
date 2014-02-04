@@ -3,6 +3,7 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
+import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -338,8 +339,7 @@ class InteractiveState {
 
 	public JButton addShapeButton = null;
 	public JButton removeShapeButton = null;
-	public boolean mouseDown = false;
-	public boolean rightMouseDown = false;
+	public boolean draggingCenter = false;
 	public boolean mouseInFrame = false;
 	public JSlider rotationSlider = null;
 	public JSlider centerXSlider = null;
@@ -478,6 +478,7 @@ class ShapeDrawingComponent extends JComponent {
 	private static Line2D.Double sharedLine = new Line2D.Double();
 	private static Ellipse2D.Double sharedEllipse = new Ellipse2D.Double();
 	private static final Vector2 tempV2 = new Vector2();
+	private static final Vector2 tempV2_2 = new Vector2();
 	private static final Vector3 tempV3 = new Vector3();
 	private long lastTick = 0;
 	private InteractiveState state;
@@ -572,7 +573,13 @@ class ShapeDrawingComponent extends JComponent {
 				double minDistToSelected = Double.POSITIVE_INFINITY;
 				for (int i = 0; i < state.shapes.size(); i++) {
 					Shape3 currentShape = state.shapes.get(i);
+					// Check distance to shape edges
 					double currentDist = currentShape.edgeToPoint(tempV2);
+					// Check distance to shape center
+					currentShape.getCenterInBox(state.currentBoxSize, tempV3);
+					state.projector.project(tempV3, tempV2_2);
+					currentDist = Math.min(currentDist,
+							tempV2_2.distanceTo(tempV2));
 					if (currentDist < minDistToSelected) {
 						minDistToSelected = currentDist;
 						selection = currentShape;
@@ -599,6 +606,8 @@ class ShapeDrawingComponent extends JComponent {
 	public void paintComponent(Graphics graphics) {
 		// Extract Graphics2D
 		Graphics2D g = (Graphics2D) graphics;
+		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+				RenderingHints.VALUE_ANTIALIAS_ON);
 		// Draw background
 		g.setColor(backgroundColor);
 		g.fill(this.getBounds());
@@ -687,7 +696,7 @@ class ShapeDrawingComponent extends JComponent {
 			g.setColor(foregroundColor);
 			g.setStroke(thinLine);
 		}
-		tempV3.set(-0.5).add(shape.getCenter()).multiply(state.currentBoxSize);
+		shape.getCenterInBox(state.currentBoxSize, tempV3);
 		state.projector.project(tempV3, tempV2);
 		sharedEllipse.setFrame(tempV2.getX() - 2.5, tempV2.getY() - 2.5, 5, 5);
 		g.draw(sharedEllipse);

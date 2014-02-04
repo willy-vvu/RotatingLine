@@ -15,7 +15,7 @@ public class Projector {
 	private Vector2 screenSize = null;
 	private Vector2 halfScreenSize = new Vector2();
 	private Vector3 position = new Vector3();
-	private static Vector3 tempVector3 = new Vector3();
+	private static Vector3 tempV3 = new Vector3();
 	private Quaternion rotation = new Quaternion();
 	private Quaternion rotationInverse = new Quaternion();
 	private double fov = 45;
@@ -89,7 +89,7 @@ public class Projector {
 	}
 
 	/**
-	 * Projects a single Vector3 onto a Vector2
+	 * Projects a single Vector3 onto a Vector2 in perspective
 	 * 
 	 * @param source
 	 * @param destination
@@ -99,14 +99,47 @@ public class Projector {
 		if (needsRecomputation) {
 			compute();
 		}
-		tempVector3.copy(source).subtract(position).rotate(rotationInverse);
-		if (tempVector3.getZ() > 0) {
-			destination.copy(tempVector3).divideScalar(tempVector3.getZ())
+		project(source, tempV3);
+		if (tempV3.getZ() > 0) {
+			tempV3.divideScalar(tempV3.getZ())
 					.multiplyScalar(ez * halfScreenSize.getY())
 					.add(halfScreenSize);
+			destination.copy(tempV3);
 		} else {
 			destination.set(Double.NaN, Double.NaN);
 		}
+		return destination;
+	}
+
+	/**
+	 * Projects a single Vector3 onto a Vector3
+	 * 
+	 * @param source
+	 * @param destination
+	 * @return the destination vector
+	 */
+	public Vector3 project(Vector3 source, Vector3 destination) {
+		if (needsRecomputation) {
+			compute();
+		}
+		tempV3.copy(source).subtract(position).rotate(rotationInverse);
+		destination.copy(tempV3);
+		return destination;
+	}
+
+	/**
+	 * Unprojects a single Vector3 onto a Vector3
+	 * 
+	 * @param source
+	 * @param destination
+	 * @return the destination vector
+	 */
+	public Vector3 unproject(Vector3 source, Vector3 destination) {
+		if (needsRecomputation) {
+			compute();
+		}
+		tempV3.copy(source).rotate(rotation).add(position);
+		destination.copy(tempV3);
 		return destination;
 	}
 
