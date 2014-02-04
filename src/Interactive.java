@@ -3,6 +3,8 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -53,7 +55,7 @@ public class Interactive {
 		// Make the controls
 		final JFrame controls = new JFrame();
 		// Set title
-		controls.setTitle("2D Rotating Line Controls");
+		controls.setTitle("Rotating Line Controls");
 		// Size and position
 		controls.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		controls.setLocation(850, 10);
@@ -61,11 +63,31 @@ public class Interactive {
 
 		// creating overall control panel
 		final JPanel overallControls = new JPanel();
-		overallControls.setLayout(new GridLayout(7, 1));
-		JPanel speedSliderPanel = new JPanel();
-		speedSliderPanel.setLayout(new GridLayout(2, 1));
-		JLabel speedSliderLabel = new JLabel("Rotation Speed", JLabel.CENTER);
-		speedSliderPanel.add(speedSliderLabel);
+		overallControls.setLayout(new GridLayout(4, 1));
+		JPanel rotationPanel = new JPanel();
+		rotationPanel.setLayout(new GridLayout(3, 1));
+		JLabel rotationSliderLabel = new JLabel("Rotation Speed", JLabel.CENTER);
+		rotationPanel.add(rotationSliderLabel);
+
+		JPanel rotationButtons = new JPanel();
+		rotationButtons.setLayout(new GridLayout(1, 2));
+
+		JButton rotationFromView = new JButton("Align rotation to view");
+		rotationFromView.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				state.alignRotationToView();
+			}
+		});
+
+		JButton resetRotation = new JButton("Reset Rotation");
+		resetRotation.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				state.resetRotation();
+			}
+		});
+
 		JPanel dimensionsPanel = new JPanel();
 		dimensionsPanel.setLayout(new GridLayout(1, 2));
 		JPanel shapeOptionsPanel = new JPanel();
@@ -81,7 +103,6 @@ public class Interactive {
 		facesSliderPanel.add(facesSliderLabel);
 		state.shapePanel = new JTabbedPane();
 		state.shapePanel.addChangeListener(new ChangeListener() {
-
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				state.set2D(state.shapePanel.getSelectedIndex() == 0);
@@ -89,16 +110,15 @@ public class Interactive {
 		});
 
 		// creating panel for the buttons
-		state.speedSlider = new JSlider(-600, 600, 0);
-		state.speedSlider.setMajorTickSpacing(200);
-		state.speedSlider.setMinorTickSpacing(50);
-		state.speedSlider.setPaintTicks(true);
+		state.rotationSlider = new JSlider(-600, 600, 0);
+		state.rotationSlider.setMajorTickSpacing(200);
+		state.rotationSlider.setMinorTickSpacing(50);
+		state.rotationSlider.setPaintTicks(true);
 		// state.speedSlider.setVisible(true);
-		state.speedSlider.addChangeListener(new ChangeListener() {
-
+		state.rotationSlider.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
-				state.setSpeed(state.speedSlider.getValue());
+				state.setSpeed(state.rotationSlider.getValue());
 			}
 		});
 
@@ -109,7 +129,6 @@ public class Interactive {
 		state.sideSlider.setPaintTicks(true);
 		state.sideSlider.setPaintLabels(true);
 		state.sideSlider.addChangeListener(new ChangeListener() {
-
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				state.setSides(state.sideSlider.getValue());
@@ -130,7 +149,6 @@ public class Interactive {
 
 		// state.facesSlider.setVisible(true);
 		state.faceSlider.addChangeListener(new ChangeListener() {
-
 			@Override
 			public void stateChanged(ChangeEvent e) {
 				state.setPreset(state.faceSlider.getValue());
@@ -138,124 +156,54 @@ public class Interactive {
 		});
 
 		state.inscribeButton = new JButton("Inscribe");
-		state.inscribeButton.addMouseListener(new MouseListener() {
-
+		state.inscribeButton.addActionListener(new ActionListener() {
 			@Override
-			public void mouseClicked(MouseEvent e) {
+			public void actionPerformed(ActionEvent e) {
 				state.inscribeButton.setEnabled(false);
 				state.inflateButton.setEnabled(true);
 				state.selectedShape.setMode((byte) 1);
-
 			}
-
-			@Override
-			public void mouseEntered(MouseEvent e) {
-			}
-
-			@Override
-			public void mouseExited(MouseEvent e) {
-			}
-
-			@Override
-			public void mousePressed(MouseEvent e) {
-			}
-
-			@Override
-			public void mouseReleased(MouseEvent e) {
-			}
-
 		});
 
 		state.inflateButton = new JButton("Inflate");
-
-		state.inflateButton.addMouseListener(new MouseListener() {
-
+		state.inflateButton.addActionListener(new ActionListener() {
 			@Override
-			public void mouseClicked(MouseEvent e) {
+			public void actionPerformed(ActionEvent e) {
 				state.inscribeButton.setEnabled(true);
 				state.inflateButton.setEnabled(false);
 				state.selectedShape.setMode((byte) 0);
-
 			}
-
-			@Override
-			public void mouseEntered(MouseEvent e) {
-			}
-
-			@Override
-			public void mouseExited(MouseEvent e) {
-			}
-
-			@Override
-			public void mousePressed(MouseEvent e) {
-			}
-
-			@Override
-			public void mouseReleased(MouseEvent e) {
-			}
-
 		});
 
 		state.addShapeButton = new JButton("Add Shape");
-		state.addShapeButton.addMouseListener(new MouseListener() {
-
+		state.addShapeButton.addActionListener(new ActionListener() {
 			@Override
-			public void mouseClicked(MouseEvent e) {
+			public void actionPerformed(ActionEvent e) {
 				Shape3 shape = new Shape3(2);
 				shape.getCenter().set(0.5, 0.5);
 				state.shapes.add(shape);
 				state.selectShape(shape);
-
-			}
-
-			@Override
-			public void mouseEntered(MouseEvent e) {
-			}
-
-			@Override
-			public void mouseExited(MouseEvent e) {
-			}
-
-			@Override
-			public void mousePressed(MouseEvent e) {
-			}
-
-			@Override
-			public void mouseReleased(MouseEvent e) {
+				state.removeShapeButton.setEnabled(true);
 			}
 
 		});
 
 		state.removeShapeButton = new JButton("Delete Shape");
-		state.removeShapeButton.addMouseListener(new MouseListener() {
-
+		state.removeShapeButton.addActionListener(new ActionListener() {
 			@Override
-			public void mouseClicked(MouseEvent e) {
-				state.shapes.remove(state.selectedShape);
+			public void actionPerformed(ActionEvent e) {
+				if (state.selectedShape != null) {
+					state.shapes.remove(state.selectedShape);
+					if (state.shapes.size() == 0) {
+						state.removeShapeButton.setEnabled(false);
+					}
+				}
 			}
-
-			@Override
-			public void mouseEntered(MouseEvent e) {
-			}
-
-			@Override
-			public void mouseExited(MouseEvent e) {
-			}
-
-			@Override
-			public void mousePressed(MouseEvent e) {
-			}
-
-			@Override
-			public void mouseReleased(MouseEvent e) {
-			}
-
 		});
 		state.threeDButton = new JButton("3D");
-		state.threeDButton.addMouseListener(new MouseListener() {
-
+		state.threeDButton.addActionListener(new ActionListener() {
 			@Override
-			public void mouseClicked(MouseEvent e) {
+			public void actionPerformed(ActionEvent e) {
 				state.threeDButton.setEnabled(false);
 				state.twoDButton.setEnabled(true);
 				state.blendDimensions = 0;
@@ -265,74 +213,120 @@ public class Interactive {
 					state.viewZoom = -state.screenSize.getY() * 2;
 				}
 			}
-
-			@Override
-			public void mouseEntered(MouseEvent e) {
-			}
-
-			@Override
-			public void mouseExited(MouseEvent e) {
-			}
-
-			@Override
-			public void mousePressed(MouseEvent e) {
-			}
-
-			@Override
-			public void mouseReleased(MouseEvent e) {
-			}
-
 		});
 
 		state.twoDButton = new JButton("2D");
 		state.twoDButton.setEnabled(false);
-		state.twoDButton.addMouseListener(new MouseListener() {
-
+		state.twoDButton.addActionListener(new ActionListener() {
 			@Override
-			public void mouseClicked(MouseEvent e) {
+			public void actionPerformed(ActionEvent e) {
 				state.threeDButton.setEnabled(true);
 				state.twoDButton.setEnabled(false);
 				state.blendDimensions = 0;
 				state.threeDimensions = false;
 			}
-
-			@Override
-			public void mouseEntered(MouseEvent e) {
-			}
-
-			@Override
-			public void mouseExited(MouseEvent e) {
-			}
-
-			@Override
-			public void mousePressed(MouseEvent e) {
-			}
-
-			@Override
-			public void mouseReleased(MouseEvent e) {
-			}
-
 		});
 
-		speedSliderPanel.add(state.speedSlider);
+		JPanel centerX = new JPanel();
+		centerX.setLayout(new GridLayout(2, 1));
+		JLabel centerXLabel = new JLabel("Shape Center X coordinate",
+				JLabel.CENTER);
+		centerX.add(centerXLabel);
+
+		state.centerXSlider = new JSlider(0, 100, 50);
+		state.centerXSlider.setMajorTickSpacing(25);
+		state.centerXSlider.setMinorTickSpacing(5);
+		state.centerXSlider.setPaintTicks(true);
+		state.centerXSlider.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				if (state.selectedShape != null) {
+					state.selectedShape.getCenter().setX(
+							state.centerXSlider.getValue() * 0.01);
+				}
+			}
+		});
+
+		JPanel centerY = new JPanel();
+		centerY.setLayout(new GridLayout(2, 1));
+		JLabel centerYLabel = new JLabel("Shape Center Y coordinate",
+				JLabel.CENTER);
+		centerY.add(centerYLabel);
+
+		state.centerYSlider = new JSlider(0, 100, 50);
+		state.centerYSlider.setMajorTickSpacing(25);
+		state.centerYSlider.setMinorTickSpacing(5);
+		state.centerYSlider.setPaintTicks(true);
+		state.centerYSlider.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				if (state.selectedShape != null) {
+					state.selectedShape.getCenter().setY(
+							state.centerYSlider.getValue() * 0.01);
+				}
+			}
+		});
+
+		JPanel centerZ = new JPanel();
+		centerZ.setLayout(new GridLayout(2, 1));
+		JLabel centerZLabel = new JLabel("Shape Center Z coordinate",
+				JLabel.CENTER);
+		centerZ.add(centerZLabel);
+
+		state.centerZSlider = new JSlider(0, 100, 50);
+		state.centerZSlider.setMajorTickSpacing(25);
+		state.centerZSlider.setMinorTickSpacing(5);
+		state.centerZSlider.setPaintTicks(true);
+		state.centerZSlider.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				if (state.selectedShape != null) {
+					state.selectedShape.getCenter().setZ(
+							state.centerZSlider.getValue() * 0.01);
+				}
+			}
+		});
+
+		centerX.add(state.centerXSlider);
+		centerY.add(state.centerYSlider);
+		centerZ.add(state.centerZSlider);
+
+		JPanel centerSliders = new JPanel();
+		centerSliders.setLayout(new GridLayout(3, 1));
+		centerSliders.add(centerX);
+		centerSliders.add(centerY);
+		centerSliders.add(centerZ);
+
+		rotationButtons.add(rotationFromView);
+		rotationButtons.add(resetRotation);
+
+		rotationPanel.add(state.rotationSlider);
+		rotationPanel.add(rotationButtons);
 		sidesSliderPanel.add(state.sideSlider);
 		facesSliderPanel.add(state.faceSlider);
-		JPanel shapeStatePanel = new JPanel();
-		shapeStatePanel.setLayout(new GridLayout(1, 2));
-		shapeStatePanel.add(state.inscribeButton);
-		shapeStatePanel.add(state.inflateButton);
-		overallControls.add(shapeStatePanel);
-		overallControls.add(speedSliderPanel);
+
+		JPanel inflateInscribePanel = new JPanel();
+		inflateInscribePanel.setLayout(new GridLayout(1, 2));
+		inflateInscribePanel.add(state.inscribeButton);
+		inflateInscribePanel.add(state.inflateButton);
+
 		state.shapePanel.addTab("2D shape", sidesSliderPanel);
 		state.shapePanel.addTab("3D polyhedron", facesSliderPanel);
-		overallControls.add(state.shapePanel);
+		dimensionsPanel.add(state.threeDButton);
 		shapeOptionsPanel.add(state.addShapeButton);
 		shapeOptionsPanel.add(state.removeShapeButton);
-		overallControls.add(shapeOptionsPanel);
-		dimensionsPanel.add(state.threeDButton);
 		dimensionsPanel.add(state.twoDButton);
-		overallControls.add(dimensionsPanel);
 
+		JPanel buttonPanel = new JPanel();
+		buttonPanel.setLayout(new GridLayout(3, 1));
+		buttonPanel.add(dimensionsPanel);
+		buttonPanel.add(shapeOptionsPanel);
+		buttonPanel.add(inflateInscribePanel);
+
+		overallControls.add(buttonPanel);
+		overallControls.add(state.shapePanel);
+		overallControls.add(rotationPanel);
+		overallControls.add(centerSliders);
 		controls.add(overallControls);
 		controls.setVisible(true);
 		state.selectShape(state.shapes.get(0));
@@ -347,7 +341,10 @@ class InteractiveState {
 	public boolean mouseDown = false;
 	public boolean rightMouseDown = false;
 	public boolean mouseInFrame = false;
-	public JSlider speedSlider = null;
+	public JSlider rotationSlider = null;
+	public JSlider centerXSlider = null;
+	public JSlider centerYSlider = null;
+	public JSlider centerZSlider = null;
 	public JSlider sideSlider = null;
 	public JSlider faceSlider = null;
 	public JButton inscribeButton = null;
@@ -358,7 +355,7 @@ class InteractiveState {
 	public JTabbedPane shapePanel = null;
 	public boolean threeDimensions = false;
 	public double blendDimensions = 0;
-	public Vector3 view = new Vector3(0.001, 0.001, -500);
+	public Vector3 view = new Vector3(0, 0, -500);
 	public Vector3 viewVelocity = new Vector3(0, 0, 0);
 	public Vector2 mousePosition = new Vector2();
 	public boolean mousePressed = false;
@@ -369,7 +366,7 @@ class InteractiveState {
 	public Shape3 selectedShape = null;
 	public ArrayList<Shape3> shapes = new ArrayList<Shape3>();
 	public Vector3 screenSize = new Vector3();
-
+	public Projector projector = new Projector(45);
 	public CubeGeometry boundingCubeGeo = new CubeGeometry(currentBoxSize);
 	public Mesh boundingCube = new Mesh(boundingCubeGeo);
 	public double viewZoom = 0;
@@ -378,6 +375,26 @@ class InteractiveState {
 		if (selectedShape != null) {
 			selectedShape.setRotationSpeed(Math.max(Math.min(speed * .01, 6),
 					-6));
+		}
+	}
+
+	/**
+	 * Sets the rotation axis of the selected shape to the projected view axis
+	 */
+	public void alignRotationToView() {
+		if (selectedShape != null) {
+			selectedShape.getRotationAxis().set(0, 0, 1)
+					.rotate(projector.getRotation());
+		}
+	}
+
+	/**
+	 * Resets the rotation axis of the selected shape
+	 */
+	public void resetRotation() {
+		if (selectedShape != null) {
+			selectedShape.get3DRotation().set(0, 0, 1, 0);
+			selectedShape.getRotationAxis().set(0, 0, 1);
 		}
 	}
 
@@ -424,7 +441,10 @@ class InteractiveState {
 
 	public void selectShape(Shape3 shape) {
 		selectedShape = shape;
-		speedSlider.setValue((int) (selectedShape.getRotationSpeed() * 100));
+		rotationSlider.setValue((int) (selectedShape.getRotationSpeed() * 100));
+		centerXSlider.setValue((int) (selectedShape.getCenter().getX() * 100));
+		centerYSlider.setValue((int) (selectedShape.getCenter().getY() * 100));
+		centerZSlider.setValue((int) (selectedShape.getCenter().getZ() * 100));
 		sideSlider.setValue(selectedShape.getSides());
 		if (selectedShape.isPreset(Shape3.TETRAHEDRON)) {
 			faceSlider.setValue(1);
@@ -461,7 +481,6 @@ class ShapeDrawingComponent extends JComponent {
 	private static final Vector3 tempV3 = new Vector3();
 	private long lastTick = 0;
 	private InteractiveState state;
-	private Projector projector = new Projector(45);
 
 	private static final Quaternion tempQ = new Quaternion();
 	private static final Quaternion tempQ_2 = new Quaternion();
@@ -591,8 +610,8 @@ class ShapeDrawingComponent extends JComponent {
 
 		// Handle the view
 		state.screenSize.set(this.getWidth(), this.getHeight(), 0);
-		projector.setScreenSize(state.screenSize);
-		projector.getPosition().set(0, 0, -30);
+		state.projector.setScreenSize(state.screenSize);
+		state.projector.getPosition().set(0, 0, -30);
 		if (state.threeDimensions) {
 			if (!state.mousePressed) {
 				tempV3.copy(state.viewVelocity)
@@ -614,16 +633,17 @@ class ShapeDrawingComponent extends JComponent {
 				rotation -= 2 * Math.PI;
 			}
 			state.view.setX(rotation);
-			tempV3.set(0.001, 0.001, -state.screenSize.getY() / 0.82);
+			tempV3.set(0, 0, -state.screenSize.getY() / 0.82);
 			state.view.lerp(tempV3, state.blendDimensions);
 		}
 		state.view.setY(Math.min(Math.max(-Math.PI / 2, state.view.getY()),
 				Math.PI / 2));
-		tempQ.setAxisAngle(state.view.getX(), yAxis);
-		tempQ_2.setAxisAngle(state.view.getY(), xAxis);
+		tempQ.setAxisAngle(yAxis, state.view.getX());
+		tempQ_2.setAxisAngle(xAxis, state.view.getY());
 		tempQ.multiply(tempQ_2);
-		projector.getRotation().setFromQuaternion(tempQ);
-		projector.getPosition().set(0, 0, state.view.getZ()).rotate(tempQ);
+		state.projector.getRotation().copy(tempQ);
+		state.projector.getPosition().set(0, 0, state.view.getZ())
+				.rotate(tempQ);
 
 		// Draw bounding box
 		if (state.threeDimensions) {
@@ -633,7 +653,7 @@ class ShapeDrawingComponent extends JComponent {
 		}
 		state.boundingCubeGeo.setSize(state.currentBoxSize);
 		state.boundingCubeGeo.rebuild();
-		state.boundingCube.project(projector);
+		state.boundingCube.project(state.projector);
 		this.drawLines(g, state.boundingCube);
 
 		// Compute, draw and advance all shapes
@@ -641,7 +661,7 @@ class ShapeDrawingComponent extends JComponent {
 			Shape3 currentShape = state.shapes.get(i);
 
 			// lets the shape know how big the window is
-			currentShape.transform(projector, state.currentBoxSize);
+			currentShape.transform(state.projector, state.currentBoxSize);
 			this.drawShape(g, currentShape);
 			currentShape.step(timeElapsed);
 		}
@@ -668,7 +688,7 @@ class ShapeDrawingComponent extends JComponent {
 			g.setStroke(thinLine);
 		}
 		tempV3.set(-0.5).add(shape.getCenter()).multiply(state.currentBoxSize);
-		projector.project(tempV3, tempV2);
+		state.projector.project(tempV3, tempV2);
 		sharedEllipse.setFrame(tempV2.getX() - 2.5, tempV2.getY() - 2.5, 5, 5);
 		g.draw(sharedEllipse);
 		// Draw the shape

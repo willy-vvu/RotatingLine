@@ -16,8 +16,8 @@ public class Projector {
 	private Vector2 halfScreenSize = new Vector2();
 	private Vector3 position = new Vector3();
 	private static Vector3 tempVector3 = new Vector3();
-	private Rotation rotation = new Rotation();
-	private Quaternion rotationQuaternion = new Quaternion();
+	private Quaternion rotation = new Quaternion();
+	private Quaternion rotationInverse = new Quaternion();
 	private double fov = 45;
 	private double ez = 0;
 	private boolean needsRecomputation = true;
@@ -99,7 +99,7 @@ public class Projector {
 		if (needsRecomputation) {
 			compute();
 		}
-		tempVector3.copy(source).subtract(position).rotate(rotationQuaternion);
+		tempVector3.copy(source).subtract(position).rotate(rotationInverse);
 		if (tempVector3.getZ() > 0) {
 			destination.copy(tempVector3).divideScalar(tempVector3.getZ())
 					.multiplyScalar(ez * halfScreenSize.getY())
@@ -117,7 +117,7 @@ public class Projector {
 	 */
 	public Projector compute() {
 		this.ez = 1 / Math.tan(Math.PI * this.fov / 360);
-		rotationQuaternion.setFromRotation(this.rotation).inverse();
+		rotationInverse.copy(this.rotation).inverse();
 		this.halfScreenSize.copy(screenSize).multiplyScalar(0.5);
 		needsRecomputation = false;
 		return this;
@@ -160,7 +160,7 @@ public class Projector {
 	/**
 	 * @return the rotation
 	 */
-	public Rotation getRotation() {
+	public Quaternion getRotation() {
 		return rotation;
 	}
 
@@ -168,7 +168,7 @@ public class Projector {
 	 * @param rotation
 	 *            the rotation to set
 	 */
-	public void setRotation(Rotation rotation) {
+	public void setRotation(Quaternion rotation) {
 		this.rotation = rotation;
 		needsRecomputation = true;
 

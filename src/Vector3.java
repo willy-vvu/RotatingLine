@@ -155,25 +155,6 @@ public class Vector3 extends Vector2 {
 	}
 
 	/**
-	 * Multiplies the current vector by a 4x4 matrix.
-	 * 
-	 * @return
-	 */
-	public Vector3 multiplyMatrix(Matrix4 matrix) {
-		// Everyone loves matrix multiplication!
-		double tempX = matrix.getAt(0, 0) * this.getX() + matrix.getAt(0, 1)
-				* this.getY() + matrix.getAt(0, 2) * this.z
-				+ matrix.getAt(0, 3), tempY = matrix.getAt(1, 0) * this.getX()
-				+ matrix.getAt(1, 1) * this.getY() + matrix.getAt(1, 2)
-				* this.z + matrix.getAt(1, 3), tempZ = matrix.getAt(2, 0)
-				* this.getX() + matrix.getAt(2, 1) * this.getY()
-				+ matrix.getAt(2, 2) * this.z + matrix.getAt(2, 3);
-		super.set(tempX, tempY);
-		this.z = tempZ;
-		return this;
-	}
-
-	/**
 	 * Linearly interpolates from the current vector to a target vector given a
 	 * ratio
 	 * 
@@ -229,17 +210,6 @@ public class Vector3 extends Vector2 {
 		Vector3.tempQ.multiply(Vector3.tempQ_2);
 		this.copy(Vector3.tempQ);
 		return this;
-	}
-
-	/**
-	 * Rotates the current vector by a Rotation
-	 * 
-	 * @param rotation
-	 * @return itself
-	 */
-	public Vector3 rotate(Rotation rotation) {
-		Vector3.tempQ.setFromRotation(rotation);
-		return this.rotate(Vector3.tempQ);
 	}
 
 	/**

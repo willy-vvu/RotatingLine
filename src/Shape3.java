@@ -22,7 +22,8 @@ import java.util.ArrayList;
 public class Shape3 extends Mesh {
 	private ArrayList<Vector3> computed = new ArrayList<Vector3>();
 	private double rotationSpeed = 0;
-	private Rotation rotation = new Rotation(0, 0, 1, 0);
+	private Vector3 rotationAxis = new Vector3(0, 0, 1);
+	private Quaternion rotation = new Quaternion(0, 0, 1, 0);
 	private static final Quaternion tempQ = new Quaternion();
 	private static final Vector3 tempV3 = new Vector3();
 	private byte mode = Shape3.INFLATE;
@@ -302,9 +303,8 @@ public class Shape3 extends Mesh {
 	 * @return itself
 	 */
 	private Shape3 rotate() {
-		Shape3.tempQ.setFromRotation(this.rotation);
 		for (int i = 0; i < getVertices().size(); i++) {
-			getVertices().get(i).copy(computed.get(i)).rotate(Shape3.tempQ);
+			getVertices().get(i).copy(computed.get(i)).rotate(this.rotation);
 		}
 		return this;
 	}
@@ -434,7 +434,8 @@ public class Shape3 extends Mesh {
 	 * @return
 	 */
 	public Shape3 step(double deltaTime) {
-		this.rotation.add(this.rotationSpeed * deltaTime);
+		tempQ.setAxisAngle(rotationAxis, rotationSpeed * deltaTime);
+		this.rotation.copy(tempQ.multiply(this.rotation));
 		return this;
 	}
 
@@ -463,7 +464,7 @@ public class Shape3 extends Mesh {
 	/**
 	 * @return the rotation
 	 */
-	public Rotation get3DRotation() {
+	public Quaternion get3DRotation() {
 		return this.rotation;
 	}
 
@@ -471,7 +472,7 @@ public class Shape3 extends Mesh {
 	 * @param rotation
 	 *            the rotation to set
 	 */
-	public void setRotation(Rotation rotation) {
+	public void setRotation(Quaternion rotation) {
 		this.rotation.copy(rotation);
 	}
 
@@ -605,5 +606,20 @@ public class Shape3 extends Mesh {
 	 */
 	public boolean isIs2D() {
 		return is2D;
+	}
+
+	/**
+	 * @return the rotationAxis
+	 */
+	public Vector3 getRotationAxis() {
+		return rotationAxis;
+	}
+
+	/**
+	 * @param rotationAxis
+	 *            the rotationAxis to set
+	 */
+	public void setRotationAxis(Vector3 rotationAxis) {
+		this.rotationAxis = rotationAxis;
 	}
 }

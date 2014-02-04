@@ -154,34 +154,6 @@ public class Vector4 extends Vector3 {
 	}
 
 	/**
-	 * Multiplies the current vector by a 4x4 matrix.
-	 * 
-	 * @return
-	 */
-	public Vector4 multiplyMatrix(Matrix4 matrix) {
-		// Everyone loves matrix multiplication!
-		double tempX = matrix.getAt(0, 0) * this.getX() + matrix.getAt(0, 1)
-				* this.getY() + matrix.getAt(0, 2) * this.getZ()
-				+ matrix.getAt(0, 3) * this.w, tempY = matrix.getAt(1, 0)
-				* this.getX() + matrix.getAt(1, 1) * this.getY()
-				+ matrix.getAt(1, 2) * this.getZ() + matrix.getAt(1, 3)
-				* this.w, tempZ = matrix.getAt(2, 0) * this.getX()
-				+ matrix.getAt(2, 1) * this.getY() + matrix.getAt(2, 2)
-				* this.getZ() + matrix.getAt(2, 3) * this.w, tempW = matrix
-				.getAt(3, 0)
-				* this.getX()
-				+ matrix.getAt(3, 1)
-				* this.getY()
-				+ matrix.getAt(3, 2)
-				* this.getZ()
-				+ matrix.getAt(3, 3)
-				* this.w;
-		super.set(tempX, tempY, tempZ);
-		this.w = tempW;
-		return this;
-	}
-
-	/**
 	 * Inverses the current Vector4.
 	 * 
 	 * @return itself

@@ -10,7 +10,7 @@
  */
 public class Quaternion extends Vector4 {
 	/**
-	 * Create a new quaterion
+	 * Create a new quaternion
 	 */
 	public Quaternion() {
 	}
@@ -18,13 +18,13 @@ public class Quaternion extends Vector4 {
 	/**
 	 * Creates a new Quaternion
 	 * 
-	 * @param angle
-	 *            the specified rotation angle
 	 * @param axis
 	 *            the rotation axis
+	 * @param angle
+	 *            the specified rotation angle
 	 */
-	public Quaternion(double angle, Vector3 axis) {
-		this.setAxisAngle(angle, axis);
+	public Quaternion(Vector3 axis, double angle) {
+		this.setAxisAngle(axis, angle);
 	}
 
 	/**
@@ -44,23 +44,12 @@ public class Quaternion extends Vector4 {
 	 * 
 	 * @return itself
 	 */
-	public Quaternion setAxisAngle(double angle, Vector3 axis) {
+	public Quaternion setAxisAngle(Vector3 axis, double angle) {
 		this.copy(axis);
 		this.setW(0);
 		this.normalize();
 		this.multiplyScalar(Math.sin(angle / 2));
 		this.setW(Math.cos(angle / 2));
-		return this;
-	}
-
-	/**
-	 * Sets the Quaternion based on a given Rotation
-	 * 
-	 * @param rotation
-	 * @return itself
-	 */
-	public Quaternion setFromRotation(Rotation rotation) {
-		this.setAxisAngle(rotation.angle, rotation);
 		return this;
 	}
 
