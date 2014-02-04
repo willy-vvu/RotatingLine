@@ -26,12 +26,7 @@ public class Mesh {
 
 	/**
 	 * Returns the minimum distance from a given point to any of the shape's
-	 * edges, using the formula:
-	 * 
-	 * dist = |(a-p)-((a-p) . n) n|
-	 * 
-	 * Where the line is the parametric vector equation a + n t n is a unit
-	 * vector defining the line direction p is the point in consideration
+	 * edges, using ellipses.
 	 * 
 	 * @param point
 	 * @return
@@ -41,15 +36,6 @@ public class Mesh {
 		for (int i = 0; i < getLines().size(); i++) {
 			Vector2 pointA = getProjected().get(getLines().get(i).getA()), pointB = getProjected()
 					.get(getLines().get(i).getB());
-			// // Compute and save a-p
-			// tempV2.copy(pointA).subtract(point);
-			// // Compute n
-			// tempV2_2.copy(pointB).subtract(pointA).normalize();
-			// // Compute ((a-p) . n) n
-			// tempV2_2.multiplyScalar(tempV2_2.dot(tempV2));
-			// minDistSquared = Math.min(minDistSquared,
-			// tempV2.subtract(tempV2_2)
-			// .lengthSquared());
 			minDist = Math.min(minDist,
 					pointA.distanceTo(point) + pointB.distanceTo(point)
 							- pointA.distanceTo(pointB));
