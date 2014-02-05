@@ -493,8 +493,21 @@ public class Shape3 extends Mesh {
 	 * @return the center
 	 */
 	public Vector3 getCenterInBox(Vector3 boxSize, Vector3 center) {
-		center.set(-0.5).add(center).multiply(boxSize);
+		center.set(-0.5).add(this.center).multiply(boxSize);
 		return center;
+	}
+
+	/**
+	 * Sets the (non-percentage) center of the shape in a given box from given
+	 * vector to it.
+	 * 
+	 * @param boxSize
+	 * @param center
+	 *            the given vector
+	 */
+	public void setCenterInBox(Vector3 boxSize, Vector3 center) {
+		tempV3.copy(center).divide(boxSize);
+		this.center.set(0.5).add(tempV3);
 	}
 
 	/**

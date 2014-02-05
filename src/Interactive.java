@@ -64,7 +64,7 @@ public class Interactive {
 
 		// creating overall control panel
 		final JPanel overallControls = new JPanel();
-		overallControls.setLayout(new GridLayout(4, 1));
+		overallControls.setLayout(new GridLayout(3, 1));
 		JPanel rotationPanel = new JPanel();
 		rotationPanel.setLayout(new GridLayout(3, 1));
 		JLabel rotationSliderLabel = new JLabel("Rotation Speed", JLabel.CENTER);
@@ -209,10 +209,6 @@ public class Interactive {
 				state.twoDButton.setEnabled(true);
 				state.blendDimensions = 0;
 				state.threeDimensions = true;
-				if (state.boxSize == null) {
-					state.boxSize = new Vector3(state.screenSize.getY());
-					state.viewZoom = -state.screenSize.getY() * 2;
-				}
 			}
 		});
 
@@ -227,76 +223,6 @@ public class Interactive {
 				state.threeDimensions = false;
 			}
 		});
-
-		JPanel centerX = new JPanel();
-		centerX.setLayout(new GridLayout(2, 1));
-		JLabel centerXLabel = new JLabel("Shape Center X coordinate",
-				JLabel.CENTER);
-		centerX.add(centerXLabel);
-
-		state.centerXSlider = new JSlider(0, 100, 50);
-		state.centerXSlider.setMajorTickSpacing(25);
-		state.centerXSlider.setMinorTickSpacing(5);
-		state.centerXSlider.setPaintTicks(true);
-		state.centerXSlider.addChangeListener(new ChangeListener() {
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				if (state.selectedShape != null) {
-					state.selectedShape.getCenter().setX(
-							state.centerXSlider.getValue() * 0.01);
-				}
-			}
-		});
-
-		JPanel centerY = new JPanel();
-		centerY.setLayout(new GridLayout(2, 1));
-		JLabel centerYLabel = new JLabel("Shape Center Y coordinate",
-				JLabel.CENTER);
-		centerY.add(centerYLabel);
-
-		state.centerYSlider = new JSlider(0, 100, 50);
-		state.centerYSlider.setMajorTickSpacing(25);
-		state.centerYSlider.setMinorTickSpacing(5);
-		state.centerYSlider.setPaintTicks(true);
-		state.centerYSlider.addChangeListener(new ChangeListener() {
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				if (state.selectedShape != null) {
-					state.selectedShape.getCenter().setY(
-							state.centerYSlider.getValue() * 0.01);
-				}
-			}
-		});
-
-		JPanel centerZ = new JPanel();
-		centerZ.setLayout(new GridLayout(2, 1));
-		JLabel centerZLabel = new JLabel("Shape Center Z coordinate",
-				JLabel.CENTER);
-		centerZ.add(centerZLabel);
-
-		state.centerZSlider = new JSlider(0, 100, 50);
-		state.centerZSlider.setMajorTickSpacing(25);
-		state.centerZSlider.setMinorTickSpacing(5);
-		state.centerZSlider.setPaintTicks(true);
-		state.centerZSlider.addChangeListener(new ChangeListener() {
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				if (state.selectedShape != null) {
-					state.selectedShape.getCenter().setZ(
-							state.centerZSlider.getValue() * 0.01);
-				}
-			}
-		});
-
-		centerX.add(state.centerXSlider);
-		centerY.add(state.centerYSlider);
-		centerZ.add(state.centerZSlider);
-
-		JPanel centerSliders = new JPanel();
-		centerSliders.setLayout(new GridLayout(3, 1));
-		centerSliders.add(centerX);
-		centerSliders.add(centerY);
-		centerSliders.add(centerZ);
 
 		rotationButtons.add(rotationFromView);
 		rotationButtons.add(resetRotation);
@@ -327,7 +253,6 @@ public class Interactive {
 		overallControls.add(buttonPanel);
 		overallControls.add(state.shapePanel);
 		overallControls.add(rotationPanel);
-		overallControls.add(centerSliders);
 		controls.add(overallControls);
 		controls.setVisible(true);
 		state.selectShape(state.shapes.get(0));
@@ -340,11 +265,7 @@ class InteractiveState {
 	public JButton addShapeButton = null;
 	public JButton removeShapeButton = null;
 	public boolean draggingCenter = false;
-	public boolean mouseInFrame = false;
 	public JSlider rotationSlider = null;
-	public JSlider centerXSlider = null;
-	public JSlider centerYSlider = null;
-	public JSlider centerZSlider = null;
 	public JSlider sideSlider = null;
 	public JSlider faceSlider = null;
 	public JButton inscribeButton = null;
@@ -355,8 +276,11 @@ class InteractiveState {
 	public JTabbedPane shapePanel = null;
 	public boolean threeDimensions = false;
 	public double blendDimensions = 0;
-	public Vector3 view = new Vector3(0, 0, -500);
+	public Vector3 view = new Vector3(0, 0, 0);
 	public Vector3 viewVelocity = new Vector3(0, 0, 0);
+	public static final Vector3 viewFriction = new Vector3(0.999, 0.999, 0.99);
+	protected static final double POINT_SELECT_THRESHOLD = 20;
+	protected static final double EDGE_SELECT_THRESHOLD = 20;
 	public Vector2 mousePosition = new Vector2();
 	public boolean mousePressed = false;
 	public long mouseLastMoved = 0;
@@ -369,7 +293,7 @@ class InteractiveState {
 	public Projector projector = new Projector(45);
 	public CubeGeometry boundingCubeGeo = new CubeGeometry(currentBoxSize);
 	public Mesh boundingCube = new Mesh(boundingCubeGeo);
-	public double viewZoom = 0;
+	public Shape3 highlight = null;
 
 	public void setSpeed(int speed) {
 		if (selectedShape != null) {
@@ -442,9 +366,6 @@ class InteractiveState {
 	public void selectShape(Shape3 shape) {
 		selectedShape = shape;
 		rotationSlider.setValue((int) (selectedShape.getRotationSpeed() * 100));
-		centerXSlider.setValue((int) (selectedShape.getCenter().getX() * 100));
-		centerYSlider.setValue((int) (selectedShape.getCenter().getY() * 100));
-		centerZSlider.setValue((int) (selectedShape.getCenter().getZ() * 100));
 		sideSlider.setValue(selectedShape.getSides());
 		if (selectedShape.isPreset(Shape3.TETRAHEDRON)) {
 			faceSlider.setValue(1);
@@ -472,13 +393,15 @@ class ShapeDrawingComponent extends JComponent {
 
 	private static final Color backgroundColor = new Color(255, 255, 255, 0);
 	private static final Color foregroundColor = new Color(0x000000);
+	private static final Color paleColor = new Color(0, 0, 0, 100);
 	private static final Color selectedColor = new Color(0, 0, 255);
-	private static final BasicStroke thickLine = new BasicStroke(5);
+	private static final Color highlightColor = new Color(100, 100, 255);
+	private static final BasicStroke thickLine = new BasicStroke(4);
+	private static final BasicStroke mediumLine = new BasicStroke(2);
 	private static final BasicStroke thinLine = new BasicStroke(1);
 	private static Line2D.Double sharedLine = new Line2D.Double();
 	private static Ellipse2D.Double sharedEllipse = new Ellipse2D.Double();
 	private static final Vector2 tempV2 = new Vector2();
-	private static final Vector2 tempV2_2 = new Vector2();
 	private static final Vector3 tempV3 = new Vector3();
 	private long lastTick = 0;
 	private InteractiveState state;
@@ -488,44 +411,34 @@ class ShapeDrawingComponent extends JComponent {
 	private static final Vector3 yAxis = new Vector3(0, 1, 0);
 	private static final Vector3 xAxis = new Vector3(1, 0, 0);
 
+	private static final int FLINGER_SPEED = 50;
+	private static final int VERTEX_RADIUS = 3;
+	private static final int CENTER_RADIUS = 6;
+	private static final int BORDER_2D = 10;
+	protected static final int SCROLL_SPEED = 25;
+
 	public ShapeDrawingComponent(final InteractiveState state) {
 		this.state = state;
+		// Get some default shapes in there to play with
+		Shape3 shapeToAdd = new Shape3(3);
+		shapeToAdd.getCenter().set(0.7, 0.4, 0.9);
+		state.shapes.add(shapeToAdd);
 
-		state.shapes.add(new Shape3(3));
-		// .add(new Shape3(5, new Vector2(0.5, 0.5), 1, (int)(Shape3.INFLATE)));
-		state.shapes.add(new Shape3(5));
-		// .add(new Shape3(3, new Vector2(0.2, 0.5), -0.4, Shape3.INSCRIBE));
-		state.shapes.add(new Shape3(7));
-		// new Shape3(2, new Vector2(0.5, 0.3), .3,Shape3.INFLATE));
-		this.addMouseMotionListener(new MouseMotionListener() {
+		shapeToAdd = new Shape3(5);
+		shapeToAdd.getCenter().set(0.3, 0.6, 0.7);
+		shapeToAdd.setMode(Shape3.INSCRIBE);
+		state.shapes.add(shapeToAdd);
 
-			@Override
-			public void mouseDragged(MouseEvent e) {
-				this.mouseMoved(e);
-			}
+		shapeToAdd = new Shape3(7);
+		shapeToAdd.getCenter().set(0.5, 0.5, 0.2);
+		state.shapes.add(shapeToAdd);
 
-			@Override
-			public void mouseMoved(MouseEvent e) {
-				if (state.threeDimensions) {
-					if (state.mousePressed) {
-						double newX = e.getPoint().getX(), newY = e.getPoint()
-								.getY();
-						tempV3.set(newX - state.mousePosition.getX(),
-								state.mousePosition.getY() - newY)
-								.multiplyScalar(0.01 * 0.2);
-						state.viewVelocity.multiplyScalar(0.8).add(tempV3);
-						state.view.add(state.viewVelocity);
-						state.mousePosition.set(newX, newY);
-					}
-				}
-			}
-
-		});
 		this.addMouseListener(new MouseListener() {
 
 			@Override
 			public void mouseReleased(MouseEvent e) {
 				state.mousePressed = false;
+				state.draggingCenter = false;
 				if (state.threeDimensions) {
 					// Stop the vertical spin when it is shallow.
 					if (Math.abs(state.viewVelocity.getY() * 3) < Math
@@ -541,17 +454,27 @@ class ShapeDrawingComponent extends JComponent {
 						state.viewVelocity.set(0, 0, 0);
 					}
 				}
-
+				state.mousePosition.set(e.getX(), e.getY());
+				state.highlight = getClosestToPoint(state.mousePosition);
 			}
 
 			@Override
 			public void mousePressed(MouseEvent e) {
 				state.mousePressed = true;
+				state.highlight = null;
 				if (state.threeDimensions) {
 					state.viewVelocity.set(0, 0, 0);
-					state.mousePosition.set(e.getPoint().getX(), e.getPoint()
-							.getY());
 					state.mouseLastMoved = new Date().getTime();
+				}
+				state.mousePosition.set(e.getX(), e.getY());
+				// Check to see if user is dragging shape center
+				if (state.selectedShape != null) {
+					state.selectedShape.getCenterInBox(state.currentBoxSize,
+							tempV3);
+					state.projector.project(tempV3, tempV2);
+					if (tempV2.distanceTo(state.mousePosition) < InteractiveState.POINT_SELECT_THRESHOLD) {
+						state.draggingCenter = true;
+					}
 				}
 			}
 
@@ -568,39 +491,107 @@ class ShapeDrawingComponent extends JComponent {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				// User wants to select a shape
-				tempV2.set(e.getX(), e.getY());
-				Shape3 selection = null;
-				double minDistToSelected = Double.POSITIVE_INFINITY;
-				for (int i = 0; i < state.shapes.size(); i++) {
-					Shape3 currentShape = state.shapes.get(i);
-					// Check distance to shape edges
-					double currentDist = currentShape.edgeToPoint(tempV2);
-					// Check distance to shape center
-					currentShape.getCenterInBox(state.currentBoxSize, tempV3);
-					state.projector.project(tempV3, tempV2_2);
-					currentDist = Math.min(currentDist,
-							tempV2_2.distanceTo(tempV2));
-					if (currentDist < minDistToSelected) {
-						minDistToSelected = currentDist;
-						selection = currentShape;
-					}
+				state.mousePosition.set(e.getX(), e.getY());
+				Shape3 selection = getClosestToPoint(state.mousePosition);
+				if (selection != null) {
+					state.selectShape(selection);
 				}
-				state.selectShape(selection);
 			}
 		});
+		this.addMouseMotionListener(new MouseMotionListener() {
 
+			@Override
+			public void mouseDragged(MouseEvent e) {
+				this.mouseMoved(e);
+			}
+
+			@Override
+			public void mouseMoved(MouseEvent e) {
+				double newX = e.getX(), newY = e.getY();
+				if (state.mousePressed) {
+					state.highlight = null;
+					if (state.draggingCenter) {
+						if (state.selectedShape != null) {
+							tempV2.set(newX - state.mousePosition.getX(), newY
+									- state.mousePosition.getY());
+							state.selectedShape.getCenterInBox(
+									state.currentBoxSize, tempV3);
+							state.projector.transform(tempV3, tempV3);
+							double depth = tempV3.getZ();
+							state.projector.perspective(tempV3);
+							tempV3.add(tempV2);
+							state.projector.inversePrespective(tempV3, depth);
+							state.projector.inverseTransform(tempV3, tempV3);
+							state.selectedShape.setCenterInBox(
+									state.currentBoxSize, tempV3);
+							// Keep the center in bounds
+							Vector3 center = state.selectedShape.getCenter();
+							center.setX(Math.min(Math.max(center.getX(), 0), 1));
+							center.setY(Math.min(Math.max(center.getY(), 0), 1));
+							center.setZ(Math.min(Math.max(center.getZ(), 0), 1));
+						}
+					} else if (state.threeDimensions) {
+						tempV3.set(newX - state.mousePosition.getX(),
+								state.mousePosition.getY() - newY)
+								.multiplyScalar(0.01 * 0.2);
+						state.viewVelocity.multiplyScalar(0.8).add(tempV3);
+						state.view.add(state.viewVelocity);
+					}
+					state.mousePosition.set(newX, newY);
+				} else {
+					state.mousePosition.set(newX, newY);
+					state.highlight = getClosestToPoint(state.mousePosition);
+				}
+			}
+		});
 		// Listen for mouse scrolling
 		this.addMouseWheelListener(new MouseWheelListener() {
 
 			@Override
 			public void mouseWheelMoved(MouseWheelEvent e) {
 				if (state.threeDimensions) {
-					state.viewZoom = (Math.min(
-							state.viewZoom - e.getPreciseWheelRotation() * 100,
-							-1));
+					state.viewVelocity.setZ(state.viewVelocity.getZ()
+							- SCROLL_SPEED * e.getPreciseWheelRotation());
 				}
 			}
 		});
+	}
+
+	/**
+	 * Gets the closest selectable shape to the cursor.
+	 * 
+	 * @param vector
+	 *            the cursor position
+	 * @return the selection (if any)
+	 */
+	private Shape3 getClosestToPoint(Vector2 vector) {
+		Shape3 selection = null;
+		double minDist = Double.POSITIVE_INFINITY;
+		boolean possibleCenterFound = false;
+		for (int i = 0; i < state.shapes.size(); i++) {
+			Shape3 currentShape = state.shapes.get(i);
+			// Check distance to shape center
+			currentShape.getCenterInBox(state.currentBoxSize, tempV3);
+			state.projector.project(tempV3, tempV2);
+			double currentDist = tempV2.distanceTo(vector);
+			if (currentDist < InteractiveState.POINT_SELECT_THRESHOLD
+					&& (currentDist < minDist || !possibleCenterFound)) {
+				minDist = currentDist;
+				selection = currentShape;
+				possibleCenterFound = true;
+			}
+			if (possibleCenterFound) {
+				continue;
+			}
+			// Check distance to shape edges if no possible point found
+			currentDist = currentShape.edgeToPoint(vector);
+			if (currentDist < InteractiveState.EDGE_SELECT_THRESHOLD
+					&& currentDist < minDist) {
+				minDist = currentDist;
+				selection = currentShape;
+			}
+		}
+		return selection;
 	}
 
 	public void paintComponent(Graphics graphics) {
@@ -618,19 +609,21 @@ class ShapeDrawingComponent extends JComponent {
 		lastTick = currentTime;
 
 		// Handle the view
-		state.screenSize.set(this.getWidth(), this.getHeight(), 0);
+		state.screenSize.set(this.getWidth(), this.getHeight());
+		if (state.boxSize == null) {
+			state.boxSize = new Vector3(state.screenSize.getY());
+			state.view.setZ(-2 * state.screenSize.getY());
+		}
 		state.projector.setScreenSize(state.screenSize);
-		state.projector.getPosition().set(0, 0, -30);
 		if (state.threeDimensions) {
 			if (!state.mousePressed) {
-				tempV3.copy(state.viewVelocity)
-						.multiplyScalar(50 * timeElapsed);
+				tempV3.copy(state.viewVelocity).multiplyScalar(
+						FLINGER_SPEED * timeElapsed);
 				state.view.add(tempV3);
 			}
-			// Animate the zoom
-			state.view.setZ(state.view.getZ() * (1 - state.blendDimensions)
-					+ state.viewZoom * state.blendDimensions);
-			state.viewVelocity.multiplyScalar(0.999);
+			state.viewVelocity.multiply(InteractiveState.viewFriction);
+			state.projector.setOrthographic(state.projector.getOrthographic()
+					* (1 - state.blendDimensions));
 		} else {
 			// Spin consistently
 			double rotation = state.view.getX();
@@ -642,11 +635,14 @@ class ShapeDrawingComponent extends JComponent {
 				rotation -= 2 * Math.PI;
 			}
 			state.view.setX(rotation);
-			tempV3.set(0, 0, -state.screenSize.getY() / 0.82);
+			tempV3.set(0, 0, state.view.getZ());
 			state.view.lerp(tempV3, state.blendDimensions);
+			state.projector.setOrthographic(state.projector.getOrthographic()
+					* (1 - state.blendDimensions) + state.blendDimensions);
 		}
 		state.view.setY(Math.min(Math.max(-Math.PI / 2, state.view.getY()),
 				Math.PI / 2));
+		state.view.setZ(Math.min(state.view.getZ(), -1));
 		tempQ.setAxisAngle(yAxis, state.view.getX());
 		tempQ_2.setAxisAngle(xAxis, state.view.getY());
 		tempQ.multiply(tempQ_2);
@@ -658,11 +654,15 @@ class ShapeDrawingComponent extends JComponent {
 		if (state.threeDimensions) {
 			state.currentBoxSize.lerp(state.boxSize, state.blendDimensions);
 		} else {
-			state.currentBoxSize.lerp(state.screenSize, state.blendDimensions);
+			tempV3.set(state.screenSize.getX() - BORDER_2D,
+					state.screenSize.getY() - BORDER_2D, state.boxSize.getZ());
+			state.currentBoxSize.lerp(tempV3, state.blendDimensions);
 		}
 		state.boundingCubeGeo.setSize(state.currentBoxSize);
 		state.boundingCubeGeo.rebuild();
 		state.boundingCube.project(state.projector);
+		g.setStroke(thinLine);
+		g.setColor(paleColor);
 		this.drawLines(g, state.boundingCube);
 
 		// Compute, draw and advance all shapes
@@ -677,6 +677,9 @@ class ShapeDrawingComponent extends JComponent {
 		// Blend the dimensions if we are shifting
 		state.blendDimensions = Math.min(state.blendDimensions + 0.05
 				* timeElapsed, 1);
+		if (state.blendDimensions > 0.05) {
+			state.blendDimensions = 1;
+		}
 		this.repaint();
 
 	}
@@ -692,16 +695,27 @@ class ShapeDrawingComponent extends JComponent {
 		if (state.selectedShape == shape) {
 			g.setColor(selectedColor);
 			g.setStroke(thickLine);
+		} else if (state.highlight == shape) {
+			g.setColor(highlightColor);
+			g.setStroke(mediumLine);
 		} else {
 			g.setColor(foregroundColor);
 			g.setStroke(thinLine);
 		}
-		shape.getCenterInBox(state.currentBoxSize, tempV3);
-		state.projector.project(tempV3, tempV2);
-		sharedEllipse.setFrame(tempV2.getX() - 2.5, tempV2.getY() - 2.5, 5, 5);
-		g.draw(sharedEllipse);
 		// Draw the shape
 		drawLines(g, shape);
+
+		// Draw the center and other vertices
+		g.setStroke(thinLine);
+		shape.getCenterInBox(state.currentBoxSize, tempV3);
+		state.projector.project(tempV3, tempV2);
+		sharedEllipse.setFrame(tempV2.getX() - CENTER_RADIUS, tempV2.getY()
+				- CENTER_RADIUS, 2 * CENTER_RADIUS, 2 * CENTER_RADIUS);
+		if (state.selectedShape == shape) {
+			g.fill(sharedEllipse);
+		} else {
+			g.draw(sharedEllipse);
+		}
 		drawVertices(g, shape);
 	}
 
@@ -737,8 +751,10 @@ class ShapeDrawingComponent extends JComponent {
 		for (int i = 0; i < mesh.getProjected().size(); i++) {
 			Vector2 vertex = mesh.getProjected().get(i);
 			if (vertex.getX() == vertex.getX()) {
-				g.drawOval((int) vertex.getX() - 3, (int) vertex.getY() - 3, 6,
-						6);
+				sharedEllipse.setFrame(vertex.getX() - VERTEX_RADIUS,
+						vertex.getY() - VERTEX_RADIUS, 2 * VERTEX_RADIUS,
+						2 * VERTEX_RADIUS);
+				g.fill(sharedEllipse);
 			}
 		}
 	}

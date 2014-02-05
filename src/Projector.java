@@ -20,6 +20,7 @@ public class Projector {
 	private Quaternion rotationInverse = new Quaternion();
 	private double fov = 45;
 	private double ez = 0;
+	private double orthographic = 0;
 	private boolean needsRecomputation = true;
 
 	public static void main(String[] args) {
@@ -99,11 +100,9 @@ public class Projector {
 		if (needsRecomputation) {
 			compute();
 		}
-		project(source, tempV3);
+		transform(source, tempV3);
 		if (tempV3.getZ() > 0) {
-			tempV3.divideScalar(tempV3.getZ())
-					.multiplyScalar(ez * halfScreenSize.getY())
-					.add(halfScreenSize);
+			perspective(tempV3);
 			destination.copy(tempV3);
 		} else {
 			destination.set(Double.NaN, Double.NaN);
@@ -112,13 +111,44 @@ public class Projector {
 	}
 
 	/**
-	 * Projects a single Vector3 onto a Vector3
+	 * Transforms a vector in camera space to a vector in screen space
+	 * 
+	 * @param vector
+	 * @return the vector
+	 */
+	public Vector3 perspective(Vector3 vector) {
+		double tempZ = vector.getZ();
+		vector.multiplyScalar(
+				ez * halfScreenSize.getY() * (1 - orthographic) + tempZ
+						* orthographic).divideScalar(tempZ).add(halfScreenSize);
+		return vector;
+	}
+
+	/**
+	 * Transforms a vector in screen space to a vector in camera space
+	 * 
+	 * @param vector
+	 * @param depth
+	 *            the lost depth information from camera space
+	 * @return the vector
+	 */
+	public Vector3 inversePrespective(Vector3 vector, double depth) {
+		vector.subtract(halfScreenSize)
+				.multiplyScalar(depth)
+				.divideScalar(
+						ez * halfScreenSize.getY() * (1 - orthographic) + depth
+								* orthographic);
+		return vector;
+	}
+
+	/**
+	 * Transforms a Vector3 in scene space to camera space
 	 * 
 	 * @param source
 	 * @param destination
 	 * @return the destination vector
 	 */
-	public Vector3 project(Vector3 source, Vector3 destination) {
+	public Vector3 transform(Vector3 source, Vector3 destination) {
 		if (needsRecomputation) {
 			compute();
 		}
@@ -128,13 +158,13 @@ public class Projector {
 	}
 
 	/**
-	 * Unprojects a single Vector3 onto a Vector3
+	 * Transforms a Vector3 in camera space back to scene space
 	 * 
 	 * @param source
 	 * @param destination
 	 * @return the destination vector
 	 */
-	public Vector3 unproject(Vector3 source, Vector3 destination) {
+	public Vector3 inverseTransform(Vector3 source, Vector3 destination) {
 		if (needsRecomputation) {
 			compute();
 		}
@@ -222,5 +252,21 @@ public class Projector {
 		this.fov = fov;
 		needsRecomputation = true;
 
+	}
+
+	/**
+	 * @return the orthographic
+	 */
+	public double getOrthographic() {
+		return orthographic;
+	}
+
+	/**
+	 * @param orthographic
+	 *            the orthographic to set
+	 */
+	public void setOrthographic(double orthographic) {
+		this.orthographic = orthographic;
+		needsRecomputation = true;
 	}
 }

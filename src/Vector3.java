@@ -98,6 +98,18 @@ public class Vector3 extends Vector2 {
 	}
 
 	/**
+	 * Divides another vector from itself.
+	 * 
+	 * @param vector
+	 * @return itself
+	 */
+	public Vector3 divide(Vector3 vector) {
+		super.divide(vector);
+		this.z = vector.z == 0 ? 0 : this.z / vector.z;
+		return this;
+	}
+
+	/**
 	 * Adds another vector into itself.
 	 * 
 	 * @param vector

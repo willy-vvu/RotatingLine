@@ -95,6 +95,18 @@ public class Vector2 {
 	}
 
 	/**
+	 * Divides another vector from itself.
+	 * 
+	 * @param vector
+	 * @return itself
+	 */
+	public Vector2 divide(Vector2 vector) {
+		this.x = vector.x == 0 ? 0 : this.x / vector.x;
+		this.y = vector.y == 0 ? 0 : this.y / vector.y;
+		return this;
+	}
+
+	/**
 	 * Adds another vector into itself.
 	 * 
 	 * @param vector
