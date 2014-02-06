@@ -748,38 +748,35 @@ class ShapeDrawingComponent extends JComponent {
 				state.leapPointing = 0;
 				if (!frame.hands().isEmpty()) {
 					Hand hand = frame.hands().get(0);
-					if (frame.hands().count() > 1) {
+					if (frame.hands().count() > 1 && hand.fingers().count() > 2
+							&& frame.hands().get(1).fingers().count() > 2
+							&& controller.frame(1).hands().count() > 1) {
 						state.leapGrab = null;
+						state.leapPointing = -1;
 						state.viewVelocity.multiplyScalar(0.5);
 						// Two hands. Check for 2D to 3D transition
 						Hand secondHand = frame.hands().get(1);
-						if (hand.fingers().count() > 0
-								&& secondHand.fingers().count() > 0
-								&& controller.frame(1).hands().count() > 1) {
-							double deltaDistance = hand
-									.stabilizedPalmPosition()
-									.distanceTo(
-											secondHand.stabilizedPalmPosition())
-									- controller
-											.frame(1)
-											.hand(hand.id())
-											.stabilizedPalmPosition()
-											.distanceTo(
-													controller
-															.frame(1)
-															.hand(secondHand
-																	.id())
-															.stabilizedPalmPosition());
-							if (deltaDistance > 2 && state.threeDimensions) {
-								state.blendDimensions = 0;
-								state.threeDimensions = false;
-								state.updateUI();
-							}
-							if (deltaDistance < -1 && !state.threeDimensions) {
-								state.blendDimensions = 0;
-								state.threeDimensions = true;
-								state.updateUI();
-							}
+						double deltaDistance = hand
+								.stabilizedPalmPosition()
+								.distanceTo(secondHand.stabilizedPalmPosition())
+								- controller
+										.frame(1)
+										.hand(hand.id())
+										.stabilizedPalmPosition()
+										.distanceTo(
+												controller
+														.frame(1)
+														.hand(secondHand.id())
+														.stabilizedPalmPosition());
+						if (deltaDistance > 5 && state.threeDimensions) {
+							state.blendDimensions = 0;
+							state.threeDimensions = false;
+							state.updateUI();
+						}
+						if (deltaDistance < -5 && !state.threeDimensions) {
+							state.blendDimensions = 0;
+							state.threeDimensions = true;
+							state.updateUI();
 						}
 					} else if (hand.fingers().count() > 1) {
 						// One hand. Rotate the scene
@@ -932,11 +929,11 @@ class ShapeDrawingComponent extends JComponent {
 
 		// Handle the view
 		state.screenSize.set(this.getWidth(), this.getHeight());
+		state.projector.setScreenSize(state.screenSize);
 		if (state.boxSize == null) {
 			state.boxSize = new Vector3(state.screenSize.getY());
 			state.view.setZ(-2 * state.screenSize.getY());
 		}
-		state.projector.setScreenSize(state.screenSize);
 		if (state.threeDimensions) {
 			if (!state.mousePressed) {
 				InteractiveState.tempV3.copy(state.viewVelocity)
@@ -984,8 +981,13 @@ class ShapeDrawingComponent extends JComponent {
 		state.boundingCubeGeo.setSize(state.currentBoxSize);
 		state.boundingCubeGeo.rebuild();
 		state.boundingCube.project(state.projector);
-		g.setStroke(THIN_STROKE);
-		g.setColor(BOUNDING_BOX_COLOR);
+		if (state.leapPointing == -1) {
+			g.setColor(LEAP_POINTER_COLOR);
+			g.setStroke(MEDIUM_STROKE);
+		} else {
+			g.setColor(BOUNDING_BOX_COLOR);
+			g.setStroke(THIN_STROKE);
+		}
 		this.drawLines(g, state.boundingCube);
 
 		// Compute, draw and advance all shapes
