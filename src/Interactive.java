@@ -1,3 +1,13 @@
+/*
+ * Interactive.java: A class to create an Interactive object
+ * for displaying and interacting with a Rotating Line (and
+ * other shapes).
+ * 
+ * Written by Liam Smith
+ * Period 5
+ * 1/23/2014
+ */
+
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics;
@@ -37,6 +47,8 @@ import com.leapmotion.leap.Pointable;
 import com.leapmotion.leap.ScreenTapGesture;
 import com.leapmotion.leap.Vector;
 
+
+
 public class Interactive {
 	private InteractiveState state;
 
@@ -45,57 +57,58 @@ public class Interactive {
 
 	}
 
+	/*
+	 * Default constructor for an Interactive object
+	 */
 	public Interactive() {
 		state = new InteractiveState();
+		
 		// Create frame
 		final JFrame frame = new JFrame();
 		state.frame = frame;
-		// Center and size the frame
 		frame.setSize(800, 800);
 		frame.setLocation(10, 10);
-		// Set defaults
 		frame.setTitle("Rotating Line Project");
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		
 		// Add the Drawing component
 		final ShapeDrawingComponent drawingComponent = new ShapeDrawingComponent(
 				state);
-		// final Shape3DrawingComponent drawingComponent3D = new
-		// Shape3DrawingComponent();
 		frame.add(drawingComponent);
-		// Make it visible
 		frame.setVisible(true);
+		
 		// Make the controls
 		final JFrame controls = new JFrame();
-		// Set title
 		controls.setTitle("Rotating Line Controls");
-		// Size and position
 		controls.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		controls.setLocation(850, 10);
 		controls.setSize(350, 800);
 
-		// creating overall control panel
+		// creating panels for controls
 		final JPanel overallControls = new JPanel();
 		overallControls.setLayout(new GridLayout(3, 1));
 		JPanel rotationPanel = new JPanel();
 		rotationPanel.setLayout(new GridLayout(3, 1));
 		JLabel rotationSliderLabel = new JLabel("Rotation Speed", JLabel.CENTER);
 		rotationPanel.add(rotationSliderLabel);
-
 		JPanel rotationButtons = new JPanel();
 		rotationButtons.setLayout(new GridLayout(1, 2));
-
-		JButton rotationFromView = new JButton("Align rotation to view");
-		rotationFromView.addActionListener(new ActionListener() {
+		
+		//defining buttons and sliders
+		state.rotationFromView = new JButton("Align rotation to view");
+		state.rotationFromView.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				//aligns the rotation the the user's current perspective
 				state.alignRotationToView();
 			}
 		});
 
-		JButton resetRotation = new JButton("Reset Rotation");
-		resetRotation.addActionListener(new ActionListener() {
+		state.resetRotation = new JButton("Reset Rotation");
+		state.resetRotation.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				//sets the rotation to the default rotation perspective
 				state.resetRotation();
 			}
 		});
@@ -109,32 +122,33 @@ public class Interactive {
 		sidesSliderPanel.setLayout(new GridLayout(2, 1));
 		JLabel sidesSliderLabel = new JLabel("Number of Sides", JLabel.CENTER);
 		sidesSliderPanel.add(sidesSliderLabel);
+		
 		JPanel facesSliderPanel = new JPanel();
 		facesSliderPanel.setLayout(new GridLayout(2, 1));
 		JLabel facesSliderLabel = new JLabel("Number of Faces", JLabel.CENTER);
 		facesSliderPanel.add(facesSliderLabel);
+		
 		state.shapePanel = new JTabbedPane();
 		state.shapePanel.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
+				//determines the dimensions based on what tab is selected
 				state.set2D(state.shapePanel.getSelectedIndex() == 0);
 			}
 		});
 
-		// creating panel for the buttons
 		state.rotationSlider = new JSlider(-600, 600, 0);
 		state.rotationSlider.setMajorTickSpacing(200);
 		state.rotationSlider.setMinorTickSpacing(50);
 		state.rotationSlider.setPaintTicks(true);
-		// state.speedSlider.setVisible(true);
 		state.rotationSlider.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
+				//sets the speed to the value of the slider
 				state.setSpeed(state.rotationSlider.getValue());
 			}
 		});
 
-		// creating sideSlider
 		state.sideSlider = new JSlider(2, 18, 2);
 		state.sideSlider.setMajorTickSpacing(1);
 		state.sideSlider.setMinorTickSpacing(1);
@@ -143,10 +157,11 @@ public class Interactive {
 		state.sideSlider.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
+				//sets the number of sides to the value of the slider
 				state.setSides(state.sideSlider.getValue());
 			}
 		});
-		// creating faceSlider
+		
 		state.faceSlider = new JSlider(1, 4, 2);
 		state.faceSlider.setMajorTickSpacing(1);
 		state.faceSlider.setMinorTickSpacing(1);
@@ -158,11 +173,10 @@ public class Interactive {
 		faceLabels.put(4, new JLabel("Icosahedron"));
 		state.faceSlider.setLabelTable(faceLabels);
 		state.faceSlider.setPaintLabels(true);
-
-		// state.facesSlider.setVisible(true);
 		state.faceSlider.addChangeListener(new ChangeListener() {
 			@Override
 			public void stateChanged(ChangeEvent e) {
+				//sets the 3D shape to the shape on the slider
 				state.setPreset(state.faceSlider.getValue());
 			}
 		});
@@ -171,6 +185,7 @@ public class Interactive {
 		state.inscribeButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				//sets the shape to the inscribed mode
 				state.inscribeButton.setEnabled(false);
 				state.inflateButton.setEnabled(true);
 				state.selectedShape.setMode((byte) 1);
@@ -181,6 +196,7 @@ public class Interactive {
 		state.inflateButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				//sets the shape to the inflated mode
 				state.inscribeButton.setEnabled(true);
 				state.inflateButton.setEnabled(false);
 				state.selectedShape.setMode((byte) 0);
@@ -191,6 +207,7 @@ public class Interactive {
 		state.addShapeButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				//adds a new shape
 				Shape3 shape = new Shape3(2);
 				shape.getCenter().set(0.5, 0.5);
 				state.shapes.add(shape);
@@ -204,6 +221,7 @@ public class Interactive {
 		state.removeShapeButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				//deletes a shape if applicable
 				if (state.selectedShape != null) {
 					state.shapes.remove(state.selectedShape);
 					if (state.shapes.size() == 0) {
@@ -212,10 +230,12 @@ public class Interactive {
 				}
 			}
 		});
+		
 		state.threeDButton = new JButton("3D");
 		state.threeDButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				//sets the view to three dimensions
 				state.threeDButton.setEnabled(false);
 				state.twoDButton.setEnabled(true);
 				state.blendDimensions = 0;
@@ -228,6 +248,7 @@ public class Interactive {
 		state.twoDButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				//sets the view to two dimensions
 				state.threeDButton.setEnabled(true);
 				state.twoDButton.setEnabled(false);
 				state.blendDimensions = 0;
@@ -235,8 +256,9 @@ public class Interactive {
 			}
 		});
 
-		rotationButtons.add(rotationFromView);
-		rotationButtons.add(resetRotation);
+		//adding buttons and Panels to the frame
+		rotationButtons.add(state.rotationFromView);
+		rotationButtons.add(state.resetRotation);
 
 		rotationPanel.add(state.rotationSlider);
 		rotationPanel.add(rotationButtons);
@@ -271,8 +293,17 @@ public class Interactive {
 	}
 }
 
-class InteractiveState {
+/*
+ * InteractiveState.java: a class that holds all the data
+ * and methods necessary for creating an Interactive object
+ * 
+ * Written by Liam Smith
+ * Period 5
+ * 1/23/2014
+ */
 
+class InteractiveState {
+	
 	protected Vector3 leapPointer = new Vector3();
 	protected int leapPointing = 0;
 	protected Shape3 leapGrab = null;
@@ -281,6 +312,8 @@ class InteractiveState {
 	protected JFrame frame = null;
 	protected JButton addShapeButton = null;
 	protected JButton removeShapeButton = null;
+	protected JButton rotationFromView;
+	protected JButton resetRotation;
 	protected Shape3 draggingCenter = null;
 	protected JSlider rotationSlider = null;
 	protected JSlider sideSlider = null;
@@ -318,6 +351,12 @@ class InteractiveState {
 	protected static final Vector2 tempV2 = new Vector2();
 	protected static final Vector3 tempV3 = new Vector3();
 
+	/*
+	 * Sets the speed of the currently selected shape
+	 * given a speed
+	 * Parameters: int speed- the speed of the shape
+	 * Returns: none
+	 */
 	protected void setSpeed(int speed) {
 		if (selectedShape != null) {
 			selectedShape.setRotationSpeed(Math.max(Math.min(speed * .01, 6),
@@ -325,8 +364,10 @@ class InteractiveState {
 		}
 	}
 
-	/**
+	/*
 	 * Sets the rotation axis of the selected shape to the projected view axis
+	 * Parameters: none
+	 * Returns: none
 	 */
 	protected void alignRotationToView() {
 		if (selectedShape != null) {
@@ -335,8 +376,10 @@ class InteractiveState {
 		}
 	}
 
-	/**
+	/*
 	 * Resets the rotation axis of the selected shape
+	 * Parameters: none
+	 * Returns: none
 	 */
 	protected void resetRotation() {
 		if (selectedShape != null) {
@@ -345,10 +388,11 @@ class InteractiveState {
 		}
 	}
 
-	/**
+	/*
 	 * Sets whether or not the shape is 2D or 3D
-	 * 
-	 * @param b
+	 * Parameters: boolean is2D- whether or not the 
+	 * 							 shape is 2D
+	 * Returns: none
 	 */
 	protected void set2D(boolean is2D) {
 		if (selectedShape != null) {
@@ -356,10 +400,11 @@ class InteractiveState {
 		}
 	}
 
-	/**
-	 * Sets the selected shape's preset.
-	 * 
-	 * @param value
+	/*
+	 * Sets the selected shape to the shape of a given
+	 * preset value.
+	 * Parameters: int value - the shape's preset value
+	 * Returns: none
 	 */
 	protected void setPreset(int value) {
 		if (selectedShape != null) {
@@ -380,19 +425,31 @@ class InteractiveState {
 		}
 	}
 
+	/*
+	 * Sets the number of sides of the selected shape
+	 * Parameters: int value - the number of sides
+	 * Returns: none
+	 */
 	protected void setSides(int value) {
 		if (selectedShape != null) {
 			selectedShape.setSides(Math.max(Math.min(value, 18), 2));
 		}
 	}
 
+	/*
+	 * Selects a given shape
+	 * Parameters: shape- the shape to be selected
+	 * Returns: none
+	 */
 	protected void selectShape(Shape3 shape) {
 		selectedShape = shape;
 		updateUI();
 	}
 
-	/**
-	 * Updates the buttons and sliders to reflect the selected shape.
+	/*
+	 * Updates the buttons and sliders to reflect the selected shape
+	 * Parameters: none
+	 * Returns: none
 	 */
 	protected void updateUI() {
 		threeDButton.setEnabled(!threeDimensions);
@@ -421,28 +478,26 @@ class InteractiveState {
 		}
 	}
 
-	/**
+	/*
 	 * Gets the closest selectable shape to the cursor, including the center,
 	 * within default thresholds.
 	 * 
-	 * @param vector
-	 *            the cursor position
-	 * @return the selection (if any)
+	 * Parameters: Vector2 vector - the cursor position
+	 * Returns: the selection (if any)
 	 */
 	protected Shape3 getClosestToPoint(Vector2 vector) {
 		return getClosestToPoint(vector, EDGE_SELECT_THRESHOLD,
 				POINT_SELECT_THRESHOLD);
 	}
 
-	/**
+	/*
 	 * Gets the closest selectable shape to the cursor, including the center,
 	 * within a threshold.
 	 * 
-	 * @param vector
-	 *            the cursor position
-	 * @param edgeThreshold
-	 * @param pointThreshold
-	 * @return the selection (if any)
+	 * Parameters: 	Vector2 vector - the cursor position
+	 * 				double edgeThreshold - the edge threshold
+	 * 	 			double pointThreshold - the point threshold
+	 * Returns: the selection (if any)
 	 */
 	protected Shape3 getClosestToPoint(Vector2 vector, double edgeThreshold,
 			double pointThreshold) {
@@ -463,27 +518,25 @@ class InteractiveState {
 		return selection;
 	}
 
-	/**
+	/*
 	 * Gets the closest selectable shape center to the cursor, within the
 	 * default threshold.
 	 * 
-	 * @param vector
-	 *            the cursor position
-	 * @return the selection (if any)
+	 * Parameters: Vector2 vector - the cursor position
+	 * Returns: the selection (if any)
 	 */
 	protected Shape3 getClosestCenterToPoint(Vector2 vector) {
 		return getClosestCenterToPoint(vector,
 				InteractiveState.POINT_SELECT_THRESHOLD);
 	}
 
-	/**
+	/*
 	 * Gets the closest selectable shape center to the cursor, within a given
 	 * threshold.
 	 * 
-	 * @param vector
-	 *            the cursor position
-	 * @param threshold
-	 * @return the selection (if any)
+	 * Parameters: 	Vector 2 vector - the cursor position
+	 *				double threshold - the threshold for selection
+	 * Returns: the selection (if any)
 	 */
 	protected Shape3 getClosestCenterToPoint(Vector2 vector, double threshold) {
 		Shape3 selection = null;
@@ -503,6 +556,14 @@ class InteractiveState {
 	}
 }
 
+/*
+ * ShapeDrawingComponent.java: The component that draws the current shape, handels
+ * mouse interaction and controller interaction
+ * 
+ * Written by Liam Smith
+ * Period 5
+ * 1/23/2014
+ */
 class ShapeDrawingComponent extends JComponent {
 	private static final long serialVersionUID = 1L;
 
@@ -536,7 +597,7 @@ class ShapeDrawingComponent extends JComponent {
 
 	public ShapeDrawingComponent(final InteractiveState state) {
 		this.state = state;
-		// Get some default shapes in there to play with
+		//Adds a few default shapes
 		Shape3 shapeToAdd = new Shape3(3);
 		shapeToAdd.getCenter().set(0.7, 0.4, 0.9);
 		state.shapes.add(shapeToAdd);
@@ -564,8 +625,7 @@ class ShapeDrawingComponent extends JComponent {
 						state.viewVelocity.setY(0);
 					}
 					// Stop the spin if you hold the mouse down or aren't moving
-					// the
-					// mouse much at all.
+					// the mouse much at all.
 					if (new Date().getTime() - state.mouseLastMoved > 250
 							|| state.viewVelocity.length() < FLINGER_STOP_THRESHOLD) {
 						state.viewVelocity.set(0, 0, 0);
@@ -672,6 +732,8 @@ class ShapeDrawingComponent extends JComponent {
 				}
 			}
 		});
+		
+		//Some crazy controller stuff
 		state.controller = new Controller();
 		state.listener = new Listener() {
 
@@ -848,9 +910,15 @@ class ShapeDrawingComponent extends JComponent {
 		});
 	}
 
+	/*
+	 * Paints the shape to a given graphics context
+	 * Parameters: Graphics graphics - the graphics context
+	 * Returns: none
+	 */
 	public void paintComponent(Graphics graphics) {
 		// Extract Graphics2D
 		Graphics2D g = (Graphics2D) graphics;
+		//adds some anti-Aliasing
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
 				RenderingHints.VALUE_ANTIALIAS_ON);
 		// Draw background
@@ -956,11 +1024,12 @@ class ShapeDrawingComponent extends JComponent {
 
 	}
 
-	/**
+	/*
 	 * draws a single shape to a given graphics context
 	 * 
-	 * @param g
-	 * @param shape
+	 * Parameters: 	Graphics 2D g - the graphics context
+	 * 				Shape 3 shape - the shape to be drawn
+	 * Returns: none
 	 */
 	private void drawShape(Graphics2D g, Shape3 shape) {
 		// Draw the center
@@ -993,12 +1062,13 @@ class ShapeDrawingComponent extends JComponent {
 		drawVertices(g, shape);
 	}
 
-	/**
-	 * Draws an {@link ArrayList} of 3D vertices and an {@link ArrayList} of
-	 * {@link Line}s joining them to a given graphics context.
+	/*
+	 * Draws an ArrayList of 3D vertices and an ArrayList of
+	 * Lines joining them to a given graphics context.
 	 * 
-	 * @param g
-	 * @param mesh
+	 * Parameters:	Graphics 2D g - the graphics context
+	 * 				Mesh mesh - the mesh containing the Line
+	 * 							Vertices
 	 */
 	private void drawLines(Graphics2D g, Mesh mesh) {
 		for (int i = 0; i < mesh.getLines().size(); i++) {
@@ -1014,12 +1084,13 @@ class ShapeDrawingComponent extends JComponent {
 		}
 	}
 
-	/**
-	 * Draws {@link ArrayList} of 3D vertices as points to a given graphics
+	/*
+	 * Draws an ArrayList of 3D vertices as points to a given graphics
 	 * context.
 	 * 
-	 * @param g
-	 * @param vertices
+	 * Parameters:	Graphics 2D g - the graphics context
+	 *				Mesh mesh - the mesh containing the Line
+	 * 							Vertices
 	 */
 	private void drawVertices(Graphics2D g, Mesh mesh) {
 		for (int i = 0; i < mesh.getProjected().size(); i++) {
