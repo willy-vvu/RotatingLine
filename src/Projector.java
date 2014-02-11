@@ -152,7 +152,7 @@ public class Projector {
 		if (needsRecomputation) {
 			compute();
 		}
-		Vector3 tempV3 = new Vector3();
+		// Vector3 tempV3 = new Vector3();
 		tempV3.copy(source).subtract(position).rotate(rotationInverse);
 		destination.copy(tempV3);
 		return destination;
@@ -169,7 +169,7 @@ public class Projector {
 		if (needsRecomputation) {
 			compute();
 		}
-		Vector3 tempV3 = new Vector3();
+		// Vector3 tempV3 = new Vector3();
 		tempV3.copy(source).rotate(rotation).add(position);
 		destination.copy(tempV3);
 		return destination;

@@ -508,7 +508,7 @@ public class Shape3 extends Mesh {
 	public void setCenterInBox(Vector3 boxSize, Vector3 center) {
 		// Somehow tempV3 and/or center is changed... It's real bizarre.
 		// Fix that I think relates to static variables:
-		Vector3 tempV3 = new Vector3();
+		// Vector3 tempV3 = new Vector3();
 		tempV3.copy(center).divide(boxSize);
 		this.center.set(0.5).add(tempV3);
 	}

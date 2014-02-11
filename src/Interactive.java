@@ -37,15 +37,15 @@ import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import com.leapmotion.leap.CircleGesture;
-import com.leapmotion.leap.Controller;
-import com.leapmotion.leap.Frame;
-import com.leapmotion.leap.Gesture;
-import com.leapmotion.leap.Hand;
-import com.leapmotion.leap.Listener;
-import com.leapmotion.leap.Pointable;
-import com.leapmotion.leap.ScreenTapGesture;
-import com.leapmotion.leap.Vector;
+//import com.leapmotion.leap.CircleGesture;
+//import com.leapmotion.leap.Controller;
+//import com.leapmotion.leap.Frame;
+//import com.leapmotion.leap.Gesture;
+//import com.leapmotion.leap.Hand;
+//import com.leapmotion.leap.Listener;
+//import com.leapmotion.leap.Pointable;
+//import com.leapmotion.leap.ScreenTapGesture;
+//import com.leapmotion.leap.Vector;
 
 
 
@@ -345,8 +345,8 @@ class InteractiveState {
 	protected CubeGeometry boundingCubeGeo = new CubeGeometry(currentBoxSize);
 	protected Mesh boundingCube = new Mesh(boundingCubeGeo);
 	protected Shape3 highlight = null;
-	protected Controller controller;
-	protected Listener listener;
+//	protected Controller controller;
+//	protected Listener listener;
 
 	protected static final Vector2 tempV2 = new Vector2();
 	protected static final Vector3 tempV3 = new Vector3();
@@ -734,177 +734,177 @@ class ShapeDrawingComponent extends JComponent {
 		});
 		
 		//Some crazy controller stuff
-		state.controller = new Controller();
-		state.listener = new Listener() {
-
-			public void onConnect(Controller controller) {
-				controller.enableGesture(Gesture.Type.TYPE_SCREEN_TAP);
-				controller.enableGesture(Gesture.Type.TYPE_CIRCLE);
-			}
-
-			public void onFrame(Controller controller) {
-				Frame frame = controller.frame();
-				state.highlight = null;
-				state.leapPointing = 0;
-				if (!frame.hands().isEmpty()) {
-					Hand hand = frame.hands().get(0);
-					if (frame.hands().count() > 1 && hand.fingers().count() > 2
-							&& frame.hands().get(1).fingers().count() > 2
-							&& controller.frame(1).hands().count() > 1) {
-						state.leapGrab = null;
-						state.leapPointing = -1;
-						state.viewVelocity.multiplyScalar(0.5);
-						// Two hands. Check for 2D to 3D transition
-						Hand secondHand = frame.hands().get(1);
-						double deltaDistance = hand
-								.stabilizedPalmPosition()
-								.distanceTo(secondHand.stabilizedPalmPosition())
-								- controller
-										.frame(1)
-										.hand(hand.id())
-										.stabilizedPalmPosition()
-										.distanceTo(
-												controller
-														.frame(1)
-														.hand(secondHand.id())
-														.stabilizedPalmPosition());
-						if (deltaDistance > 5 && state.threeDimensions) {
-							state.blendDimensions = 0;
-							state.threeDimensions = false;
-							state.updateUI();
-						}
-						if (deltaDistance < -5 && !state.threeDimensions) {
-							state.blendDimensions = 0;
-							state.threeDimensions = true;
-							state.updateUI();
-						}
-					} else if (hand.fingers().count() > 1) {
-						// One hand. Rotate the scene
-						Vector palmVelocity = hand.palmVelocity();
-						if (state.leapGrab != null) {
-							// This if body caused many issues that I think had
-							// to do with the static temporary variables.
-							// I fixed it by temporarily creating a new
-							// temporary object like so:
-							Vector3 tempV3 = new Vector3();
-							state.leapPointing = 2;
-							Pointable pointer = frame.pointables().frontmost();
-							Vector position = frame.interactionBox()
-									.normalizePoint(
-											pointer.stabilizedTipPosition(),
-											false);
-							state.leapToTouch = pointer.touchDistance();
-							state.leapPointer
-									.set(position.getX(), 1 - position.getY(),
-											0).multiply(state.screenSize)
-									.setZ(position.getZ());
-							state.leapGrab.getCenterInBox(state.currentBoxSize,
-									tempV3);
-							state.projector.transform(tempV3, tempV3);
-							double depth = Math.max(tempV3.getZ() - 0.1
-									* palmVelocity.getZ(), 1);
-							state.projector.perspective(tempV3);
-							double depth2 = tempV3.getZ();
-							tempV3.copy(state.leapPointer).setZ(depth2);
-							state.projector.inversePrespective(tempV3, depth);
-							state.projector.inverseTransform(tempV3, tempV3);
-							state.leapGrab.setCenterInBox(state.currentBoxSize,
-									tempV3);
-							// Keep the center in bounds
-							Vector3 center = state.leapGrab.getCenter();
-							center.setX(Math.min(Math.max(center.getX(), 0), 1));
-							center.setY(Math.min(Math.max(center.getY(), 0), 1));
-							center.setZ(Math.min(Math.max(center.getZ(), 0), 1));
-						} else {
-							if (state.threeDimensions) {
-								state.viewVelocity.set(
-										palmVelocity.getX() * 0.0005,
-										palmVelocity.getY() * 0.0002,
-										palmVelocity.getZ() * 0.1);
-							}
-						}
-					} else {
-						// One hand with closed fist/finger
-						state.viewVelocity.multiplyScalar(0.9);
-						if (frame.pointables().count() > 0) {
-							state.leapPointing = 1;
-							// One finger. Select shapes
-							Pointable pointer = frame.pointables().frontmost();
-							Vector position = frame.interactionBox()
-									.normalizePoint(
-											pointer.stabilizedTipPosition(),
-											true);
-							state.leapToTouch = pointer.touchDistance();
-							state.leapPointer
-									.set(position.getX(), 1 - position.getY(),
-											0).multiply(state.screenSize)
-									.setZ(position.getZ());
-							state.highlight = state.getClosestToPoint(
-									state.leapPointer,
-									Double.POSITIVE_INFINITY, 20);
-							state.leapGrab = state.getClosestCenterToPoint(
-									state.leapPointer, 20);
-							if (!frame.gestures().isEmpty()) {
-								for (int i = 0; i < frame.gestures().count(); i++) {
-									Gesture gesture = frame.gestures().get(i);
-									if (gesture.type() == Gesture.Type.TYPE_SCREEN_TAP) {
-										ScreenTapGesture tap = new ScreenTapGesture(
-												gesture);
-										if (!tap.pointable().equals(pointer)) {
-											continue;
-										}
-										if (state.highlight != null) {
-											state.selectShape(state.highlight);
-										}
-										break;
-									} else if (gesture.type() == Gesture.Type.TYPE_CIRCLE) {
-										CircleGesture circle = new CircleGesture(
-												gesture);
-										if (!circle.pointable().equals(pointer)) {
-											continue;
-										}
-										CircleGesture previous = new CircleGesture(
-												controller.frame(1).gesture(
-														circle.id()));
-										int clockwise = -1;
-										if (circle.pointable().direction()
-												.angleTo(circle.normal()) <= Math.PI / 4) {
-											clockwise = 1;
-										}
-										double angle = (circle.progress() - previous
-												.progress())
-												* 2
-												* Math.PI
-												* 0.2;
-										if (state.selectedShape != null) {
-											state.selectedShape
-													.setRotationSpeed(Math.min(
-															Math.max(
-																	state.selectedShape
-																			.getRotationSpeed()
-																			+ clockwise
-																			* angle,
-																	-6), 6));
-											state.updateUI();
-										}
-										break;
-									}
-								}
-							}
-						} else {
-							// Closed fist
-							state.leapGrab = null;
-						}
-					}
-				}
-			}
-		};
-		state.controller.addListener(state.listener);
-		state.frame.addWindowListener(new java.awt.event.WindowAdapter() {
-			public void windowClosing(java.awt.event.WindowEvent evt) {
-				state.controller.removeListener(state.listener);
-			}
-		});
+		// state.controller = new Controller();
+		// state.listener = new Listener() {
+		//
+		// public void onConnect(Controller controller) {
+		// controller.enableGesture(Gesture.Type.TYPE_SCREEN_TAP);
+		// controller.enableGesture(Gesture.Type.TYPE_CIRCLE);
+		// }
+		//
+		// public void onFrame(Controller controller) {
+		// Frame frame = controller.frame();
+		// state.highlight = null;
+		// state.leapPointing = 0;
+		// if (!frame.hands().isEmpty()) {
+		// Hand hand = frame.hands().get(0);
+		// if (frame.hands().count() > 1 && hand.fingers().count() > 2
+		// && frame.hands().get(1).fingers().count() > 2
+		// && controller.frame(1).hands().count() > 1) {
+		// state.leapGrab = null;
+		// state.leapPointing = -1;
+		// state.viewVelocity.multiplyScalar(0.5);
+		// // Two hands. Check for 2D to 3D transition
+		// Hand secondHand = frame.hands().get(1);
+		// double deltaDistance = hand
+		// .stabilizedPalmPosition()
+		// .distanceTo(secondHand.stabilizedPalmPosition())
+		// - controller
+		// .frame(1)
+		// .hand(hand.id())
+		// .stabilizedPalmPosition()
+		// .distanceTo(
+		// controller
+		// .frame(1)
+		// .hand(secondHand.id())
+		// .stabilizedPalmPosition());
+		// if (deltaDistance > 5 && state.threeDimensions) {
+		// state.blendDimensions = 0;
+		// state.threeDimensions = false;
+		// state.updateUI();
+		// }
+		// if (deltaDistance < -5 && !state.threeDimensions) {
+		// state.blendDimensions = 0;
+		// state.threeDimensions = true;
+		// state.updateUI();
+		// }
+		// } else if (hand.fingers().count() > 1) {
+		// // One hand. Rotate the scene
+		// Vector palmVelocity = hand.palmVelocity();
+		// if (state.leapGrab != null) {
+		// // This if body caused many issues that I think had
+		// // to do with the static temporary variables.
+		// // I fixed it by temporarily creating a new
+		// // temporary object like so:
+		// Vector3 tempV3 = new Vector3();
+		// state.leapPointing = 2;
+		// Pointable pointer = frame.pointables().frontmost();
+		// Vector position = frame.interactionBox()
+		// .normalizePoint(
+		// pointer.stabilizedTipPosition(),
+		// false);
+		// state.leapToTouch = pointer.touchDistance();
+		// state.leapPointer
+		// .set(position.getX(), 1 - position.getY(),
+		// 0).multiply(state.screenSize)
+		// .setZ(position.getZ());
+		// state.leapGrab.getCenterInBox(state.currentBoxSize,
+		// tempV3);
+		// state.projector.transform(tempV3, tempV3);
+		// double depth = Math.max(tempV3.getZ() - 0.1
+		// * palmVelocity.getZ(), 1);
+		// state.projector.perspective(tempV3);
+		// double depth2 = tempV3.getZ();
+		// tempV3.copy(state.leapPointer).setZ(depth2);
+		// state.projector.inversePrespective(tempV3, depth);
+		// state.projector.inverseTransform(tempV3, tempV3);
+		// state.leapGrab.setCenterInBox(state.currentBoxSize,
+		// tempV3);
+		// // Keep the center in bounds
+		// Vector3 center = state.leapGrab.getCenter();
+		// center.setX(Math.min(Math.max(center.getX(), 0), 1));
+		// center.setY(Math.min(Math.max(center.getY(), 0), 1));
+		// center.setZ(Math.min(Math.max(center.getZ(), 0), 1));
+		// } else {
+		// if (state.threeDimensions) {
+		// state.viewVelocity.set(
+		// palmVelocity.getX() * 0.0005,
+		// palmVelocity.getY() * 0.0002,
+		// palmVelocity.getZ() * 0.1);
+		// }
+		// }
+		// } else {
+		// // One hand with closed fist/finger
+		// state.viewVelocity.multiplyScalar(0.9);
+		// if (frame.pointables().count() > 0) {
+		// state.leapPointing = 1;
+		// // One finger. Select shapes
+		// Pointable pointer = frame.pointables().frontmost();
+		// Vector position = frame.interactionBox()
+		// .normalizePoint(
+		// pointer.stabilizedTipPosition(),
+		// true);
+		// state.leapToTouch = pointer.touchDistance();
+		// state.leapPointer
+		// .set(position.getX(), 1 - position.getY(),
+		// 0).multiply(state.screenSize)
+		// .setZ(position.getZ());
+		// state.highlight = state.getClosestToPoint(
+		// state.leapPointer,
+		// Double.POSITIVE_INFINITY, 20);
+		// state.leapGrab = state.getClosestCenterToPoint(
+		// state.leapPointer, 20);
+		// if (!frame.gestures().isEmpty()) {
+		// for (int i = 0; i < frame.gestures().count(); i++) {
+		// Gesture gesture = frame.gestures().get(i);
+		// if (gesture.type() == Gesture.Type.TYPE_SCREEN_TAP) {
+		// ScreenTapGesture tap = new ScreenTapGesture(
+		// gesture);
+		// if (!tap.pointable().equals(pointer)) {
+		// continue;
+		// }
+		// if (state.highlight != null) {
+		// state.selectShape(state.highlight);
+		// }
+		// break;
+		// } else if (gesture.type() == Gesture.Type.TYPE_CIRCLE) {
+		// CircleGesture circle = new CircleGesture(
+		// gesture);
+		// if (!circle.pointable().equals(pointer)) {
+		// continue;
+		// }
+		// CircleGesture previous = new CircleGesture(
+		// controller.frame(1).gesture(
+		// circle.id()));
+		// int clockwise = -1;
+		// if (circle.pointable().direction()
+		// .angleTo(circle.normal()) <= Math.PI / 4) {
+		// clockwise = 1;
+		// }
+		// double angle = (circle.progress() - previous
+		// .progress())
+		// * 2
+		// * Math.PI
+		// * 0.2;
+		// if (state.selectedShape != null) {
+		// state.selectedShape
+		// .setRotationSpeed(Math.min(
+		// Math.max(
+		// state.selectedShape
+		// .getRotationSpeed()
+		// + clockwise
+		// * angle,
+		// -6), 6));
+		// state.updateUI();
+		// }
+		// break;
+		// }
+		// }
+		// }
+		// } else {
+		// // Closed fist
+		// state.leapGrab = null;
+		// }
+		// }
+		// }
+		// }
+		// };
+		// state.controller.addListener(state.listener);
+		// state.frame.addWindowListener(new java.awt.event.WindowAdapter() {
+		// public void windowClosing(java.awt.event.WindowEvent evt) {
+		// state.controller.removeListener(state.listener);
+		// }
+		// });
 	}
 
 	/*
